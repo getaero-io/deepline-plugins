@@ -1,0 +1,12 @@
+{
+  "name": "deepline",
+  "owner": { "name": "Deepline" },
+  "plugins": [
+    {
+      "name": "deepline",
+      "description": "Deepline GTM skills and CLI",
+      "version": "0.0.1-spike",
+      "source": "./"
+    }
+  ]
+}

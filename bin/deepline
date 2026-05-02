@@ -1,0 +1,15 @@
+#!/usr/bin/env sh
+# Deepline CLI shim. Execs the shiv that the SessionStart hook caches at a
+# deterministic path. Avoids $CLAUDE_PLUGIN_DATA — that variable leaks from
+# other plugins' contexts in the general Bash tool environment.
+set -e
+
+CACHE_ROOT="${XDG_DATA_HOME:-$HOME/.local/share}/deepline-plugin"
+SHIV="$CACHE_ROOT/cli/deepline.pyz"
+
+if [ ! -x "$SHIV" ]; then
+  echo "deepline: shiv missing at $SHIV — start a new Claude Code session so the SessionStart hook can fetch it." >&2
+  exit 127
+fi
+
+exec "$SHIV" "$@"
