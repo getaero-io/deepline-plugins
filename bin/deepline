@@ -1,8 +1,7 @@
 #!/usr/bin/env sh
 # Deepline CLI shim. Execs the cached Python shiv. Self-healing: if the shiv
 # isn't present (cold cache, ephemeral cloud sandbox, or SessionStart hook
-# didn't fire), fetch it inline before exec. Atomic rename avoids corrupting
-# the cache if the SessionStart hook is racing this shim on first run.
+# didn't fire), fetch it inline before exec.
 set -e
 
 CACHE_ROOT="${XDG_DATA_HOME:-$HOME/.local/share}/deepline-plugin"
@@ -21,5 +20,16 @@ if [ ! -x "$SHIV" ]; then
     exit 127
   fi
 fi
+
+# Match the standalone bash installer's env wiring so behavior is identical
+# whether the user has both installs or just the plugin. This aligns:
+#   - the API base URL (overrides any trailing-slash baked into the shiv)
+#   - the config scope, so auth state lives at ~/.local/deepline/code-deepline-com/.env
+#     and is shared with the standalone CLI on machines that have both
+#   - the install method tag, used by `deepline update` self-update path
+export DEEPLINE_API_BASE_URL="${DEEPLINE_API_BASE_URL:-https://code.deepline.com}"
+export DEEPLINE_CONFIG_SCOPE="${DEEPLINE_CONFIG_SCOPE:-code-deepline-com}"
+export DEEPLINE_INSTALL_METHOD="${DEEPLINE_INSTALL_METHOD:-shiv}"
+export DEEPLINE_REAL_BINARY="${DEEPLINE_REAL_BINARY:-$SHIV}"
 
 exec "$SHIV" "$@"

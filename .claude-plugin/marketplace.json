@@ -5,7 +5,7 @@
     {
       "name": "deepline",
       "description": "Deepline GTM skills and CLI",
-      "version": "0.0.2-spike",
+      "version": "0.0.3-spike",
       "source": "./"
     }
   ]
