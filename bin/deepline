@@ -21,12 +21,21 @@ if [ ! -x "$SHIV" ]; then
   fi
 fi
 
+# Cross-session auth persistence for ephemeral sandboxes (e.g. Cowork).
+# If a workspace .env exists, source it so DEEPLINE_API_KEY survives across
+# fresh sandbox sessions. The workspace folder is bind-mounted from the
+# user's local machine and persists across cloud sandbox teardowns.
+WORKSPACE_DIR="${CLAUDE_PROJECT_DIR:-$PWD}"
+WORKSPACE_ENV="$WORKSPACE_DIR/.deepline/.env"
+if [ -f "$WORKSPACE_ENV" ]; then
+  set -a
+  # shellcheck disable=SC1090
+  . "$WORKSPACE_ENV"
+  set +a
+fi
+
 # Match the standalone bash installer's env wiring so behavior is identical
-# whether the user has both installs or just the plugin. This aligns:
-#   - the API base URL (overrides any trailing-slash baked into the shiv)
-#   - the config scope, so auth state lives at ~/.local/deepline/code-deepline-com/.env
-#     and is shared with the standalone CLI on machines that have both
-#   - the install method tag, used by `deepline update` self-update path
+# whether the user has both installs or just the plugin.
 export DEEPLINE_API_BASE_URL="${DEEPLINE_API_BASE_URL:-https://code.deepline.com}"
 export DEEPLINE_CONFIG_SCOPE="${DEEPLINE_CONFIG_SCOPE:-code-deepline-com}"
 export DEEPLINE_INSTALL_METHOD="${DEEPLINE_INSTALL_METHOD:-shiv}"
