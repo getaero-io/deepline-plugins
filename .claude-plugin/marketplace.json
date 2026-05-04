@@ -1,12 +1,14 @@
 {
   "name": "deepline",
-  "owner": { "name": "Deepline" },
+  "owner": { "name": "Deepline", "url": "https://code.deepline.com" },
   "plugins": [
     {
       "name": "deepline",
-      "description": "Deepline GTM skills and CLI",
-      "version": "0.0.4-spike",
-      "source": "./"
+      "description": "Deepline GTM skills and CLI for Claude Code (laptop and Cowork sandboxes).",
+      "version": "1.0.0",
+      "source": "./",
+      "category": "productivity",
+      "keywords": ["gtm", "outbound", "enrichment", "deepline", "sales"]
     }
   ]
 }

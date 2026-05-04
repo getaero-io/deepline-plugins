@@ -1,7 +1,10 @@
 {
   "name": "deepline",
-  "version": "0.0.4-spike",
-  "description": "Deepline GTM skills and CLI (spike)",
+  "version": "1.0.0",
+  "description": "Deepline GTM skills and CLI for Claude Code (laptop and Cowork sandboxes).",
   "author": { "name": "Deepline" },
-  "homepage": "https://code.deepline.com"
+  "homepage": "https://code.deepline.com",
+  "repository": "https://github.com/getaero-io/deepline-plugins",
+  "license": "MIT",
+  "keywords": ["gtm", "outbound", "enrichment", "deepline", "sales"]
 }
