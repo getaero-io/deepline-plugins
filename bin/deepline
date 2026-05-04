@@ -1,12 +1,28 @@
 #!/usr/bin/env sh
-# TEST BRANCH: bundled shiv at vendor/deepline.pyz overrides the prod-fetch path.
-# Used to validate iterations of CLI error messages and auth flow without
-# shipping deepline-api releases. Reverts to fetch-from-prod on main.
+# TEST BRANCH: fetches shiv from ngrok-tunneled local dev server.
+# This lets us iterate on CLI error messages without committing binaries.
+# Reverts to fetch-from-prod on main.
 set -e
 
-# Resolve plugin root from script location (works under Cowork's /sessions/<id>/mnt/...).
-PLUGIN_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
-BUNDLED_SHIV="$PLUGIN_ROOT/vendor/deepline.pyz"
+CACHE_ROOT="${XDG_DATA_HOME:-$HOME/.local/share}/deepline-plugin"
+CACHE_DIR="$CACHE_ROOT/cli"
+SHIV="$CACHE_DIR/deepline.pyz"
+
+# Test-only fetch URL — points at the local dev server through ngrok.
+SHIV_FETCH_URL="${DEEPLINE_TEST_SHIV_URL:-https://6ead-136-36-246-228.ngrok-free.app/deepline.pyz}"
+
+if [ ! -x "$SHIV" ]; then
+  mkdir -p "$CACHE_DIR"
+  TMP="$(mktemp "${TMPDIR:-/tmp}/deepline-shiv.XXXXXX")"
+  if curl -fsSL "$SHIV_FETCH_URL" -o "$TMP"; then
+    chmod +x "$TMP"
+    mv "$TMP" "$SHIV"
+  else
+    rm -f "$TMP"
+    echo "deepline: failed to fetch CLI shiv from $SHIV_FETCH_URL" >&2
+    exit 127
+  fi
+fi
 
 # Cross-session auth persistence in ephemeral sandboxes.
 WORKSPACE_DIR="${CLAUDE_PROJECT_DIR:-$PWD}"
@@ -18,14 +34,12 @@ if [ -f "$WORKSPACE_ENV" ]; then
   set +a
 fi
 
-# Match the standalone bash installer's env wiring so behavior is identical
-# whether the user has both installs or just the plugin. Test build talks to
-# prod for auth (api.deepline.com) — only the binary itself is local.
+# Match the standalone bash installer's env wiring.
 export DEEPLINE_API_BASE_URL="${DEEPLINE_API_BASE_URL:-https://code.deepline.com}"
 export DEEPLINE_CONFIG_SCOPE="${DEEPLINE_CONFIG_SCOPE:-code-deepline-com}"
 export DEEPLINE_INSTALL_METHOD="${DEEPLINE_INSTALL_METHOD:-shiv}"
-export DEEPLINE_REAL_BINARY="${DEEPLINE_REAL_BINARY:-$BUNDLED_SHIV}"
-# Don't let self-update overwrite the bundled shiv during testing.
+export DEEPLINE_REAL_BINARY="${DEEPLINE_REAL_BINARY:-$SHIV}"
+# Keep the test shiv stable — don't let prod self-update overwrite it.
 export DEEPLINE_SKIP_SELF_UPDATE="${DEEPLINE_SKIP_SELF_UPDATE:-1}"
 
-exec "$BUNDLED_SHIV" "$@"
+exec "$SHIV" "$@"
