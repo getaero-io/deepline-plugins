@@ -1,30 +1,14 @@
 #!/usr/bin/env sh
-# Deepline CLI shim. Execs the cached Python shiv. Self-healing: if the shiv
-# isn't present (cold cache, ephemeral cloud sandbox, or SessionStart hook
-# didn't fire), fetch it inline before exec.
+# TEST BRANCH: bundled shiv at vendor/deepline.pyz overrides the prod-fetch path.
+# Used to validate iterations of CLI error messages and auth flow without
+# shipping deepline-api releases. Reverts to fetch-from-prod on main.
 set -e
 
-CACHE_ROOT="${XDG_DATA_HOME:-$HOME/.local/share}/deepline-plugin"
-CACHE_DIR="$CACHE_ROOT/cli"
-SHIV="$CACHE_DIR/deepline.pyz"
+# Resolve plugin root from script location (works under Cowork's /sessions/<id>/mnt/...).
+PLUGIN_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
+BUNDLED_SHIV="$PLUGIN_ROOT/vendor/deepline.pyz"
 
-if [ ! -x "$SHIV" ]; then
-  mkdir -p "$CACHE_DIR"
-  TMP="$(mktemp "${TMPDIR:-/tmp}/deepline-shiv.XXXXXX")"
-  if curl -fsSL "https://code.deepline.com/api/v2/cli/python" -o "$TMP"; then
-    chmod +x "$TMP"
-    mv "$TMP" "$SHIV"
-  else
-    rm -f "$TMP"
-    echo "deepline: failed to fetch CLI shiv from https://code.deepline.com/api/v2/cli/python" >&2
-    exit 127
-  fi
-fi
-
-# Cross-session auth persistence for ephemeral sandboxes (e.g. Cowork).
-# If a workspace .env exists, source it so DEEPLINE_API_KEY survives across
-# fresh sandbox sessions. The workspace folder is bind-mounted from the
-# user's local machine and persists across cloud sandbox teardowns.
+# Cross-session auth persistence in ephemeral sandboxes.
 WORKSPACE_DIR="${CLAUDE_PROJECT_DIR:-$PWD}"
 WORKSPACE_ENV="$WORKSPACE_DIR/.deepline/.env"
 if [ -f "$WORKSPACE_ENV" ]; then
@@ -35,10 +19,13 @@ if [ -f "$WORKSPACE_ENV" ]; then
 fi
 
 # Match the standalone bash installer's env wiring so behavior is identical
-# whether the user has both installs or just the plugin.
+# whether the user has both installs or just the plugin. Test build talks to
+# prod for auth (api.deepline.com) — only the binary itself is local.
 export DEEPLINE_API_BASE_URL="${DEEPLINE_API_BASE_URL:-https://code.deepline.com}"
 export DEEPLINE_CONFIG_SCOPE="${DEEPLINE_CONFIG_SCOPE:-code-deepline-com}"
 export DEEPLINE_INSTALL_METHOD="${DEEPLINE_INSTALL_METHOD:-shiv}"
-export DEEPLINE_REAL_BINARY="${DEEPLINE_REAL_BINARY:-$SHIV}"
+export DEEPLINE_REAL_BINARY="${DEEPLINE_REAL_BINARY:-$BUNDLED_SHIV}"
+# Don't let self-update overwrite the bundled shiv during testing.
+export DEEPLINE_SKIP_SELF_UPDATE="${DEEPLINE_SKIP_SELF_UPDATE:-1}"
 
-exec "$SHIV" "$@"
+exec "$BUNDLED_SHIV" "$@"
