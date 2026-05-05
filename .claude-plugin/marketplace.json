@@ -5,7 +5,7 @@
     {
       "name": "deepline",
       "description": "Deepline GTM skills and CLI for Claude Code (laptop and Cowork sandboxes).",
-      "version": "1.0.5-ngrok-test",
+      "version": "1.0.6-ngrok-test",
       "source": "./",
       "category": "productivity",
       "keywords": ["gtm", "outbound", "enrichment", "deepline", "sales"]

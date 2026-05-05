@@ -25,12 +25,31 @@ if [ ! -x "$SHIV" ]; then
 fi
 
 # Cross-session auth persistence in ephemeral sandboxes.
-WORKSPACE_DIR="${CLAUDE_PROJECT_DIR:-$PWD}"
-WORKSPACE_ENV="$WORKSPACE_DIR/.deepline/.env"
-if [ -f "$WORKSPACE_ENV" ]; then
+# Resolution order matches the CLI's _resolve_remote_workspace_dir:
+#   1. $CLAUDE_PROJECT_DIR (laptop and possibly future Cowork)
+#   2. $HOME/mnt/<workspace>/ — Cowork's connected-workspace mount;
+#      pick the first non-dot-prefixed directory.
+WORKSPACE_DIR="${CLAUDE_PROJECT_DIR:-}"
+if [ -z "$WORKSPACE_DIR" ] && [ -n "${HOME:-}" ] && [ -d "$HOME/mnt" ]; then
+  case "$HOME" in
+    /sessions/*)
+      for _candidate in "$HOME"/mnt/*/; do
+        [ -d "$_candidate" ] || continue
+        _basename="${_candidate%/}"
+        _basename="${_basename##*/}"
+        case "$_basename" in
+          .*) continue ;;
+        esac
+        WORKSPACE_DIR="${_candidate%/}"
+        break
+      done
+      ;;
+  esac
+fi
+if [ -n "$WORKSPACE_DIR" ] && [ -f "$WORKSPACE_DIR/.deepline/.env" ]; then
   set -a
   # shellcheck disable=SC1090
-  . "$WORKSPACE_ENV"
+  . "$WORKSPACE_DIR/.deepline/.env"
   set +a
 fi
 
