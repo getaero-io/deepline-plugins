@@ -1,6 +1,6 @@
 ---
 name: deepline-gtm
-description: "Use this skill for GTM prospecting, enrichment, qualification, and outbound workflows, especially when users mention Deepline, CSV processing, lead/account/contact research, waterfall enrichment, email or LinkedIn lookup, personalization, scoring, or campaign activation. Route CSV-heavy and provider-driven requests through this skill, then rely on linked sub-docs and provider playbooks for execution details. Available providers: adyntel, ai_ark, apify, apollo, attio, bettercontact, bloomberry, builtwith, cloudflare, contactout, crustdata, customer_db, dataforseo, datagma, deepline_native, deeplineagent, dropleads, exa, findymail, firecrawl, forager, fullenrich, generic_http, heyreach, hubspot, hunter, icypeas, instantly, ipqs, leadmagic, lemlist, linkedin_ads_audiences, lusha, openwebninja, parallel, peopledatalabs, prospeo, rocketreach, salesforce, serper, slack, smartlead, snowflake, theirstack, trestle, wiza, zerobounce."
+description: "Use this skill for GTM prospecting, enrichment, qualification, and outbound workflows, especially when users mention Deepline, CSV processing, lead/account/contact research, waterfall enrichment, email or LinkedIn lookup, personalization, scoring, or campaign activation. Route CSV-heavy and provider-driven requests through this skill, then rely on linked sub-docs and provider playbooks for execution details. Available providers: adyntel, ai_ark, apify, apollo, attio, bettercontact, bloomberry, builtwith, cloudflare, contactout, crustdata, customer_db, dataforseo, datagma, deepline_native, deeplineagent, discolike, dropleads, exa, findymail, firecrawl, forager, fullenrich, generic_http, heyreach, hubspot, hunter, icypeas, instantly, ipqs, leadmagic, lemlist, linkedin_ads_audiences, lusha, openwebninja, parallel, peopledatalabs, prospeo, rocketreach, salesforce, serper, slack, smartlead, snowflake, theirstack, trestle, wiza, zerobounce."
 ---
 
 # GTM Meta Skill
@@ -198,7 +198,7 @@ GTM time windows, thresholds, and interpretation rules are defined in the Defini
 
 - [ai_ark playbook](provider-playbooks/ai_ark.md)
   Summary: Use company and people search for prospecting, reverse lookup for identity resolution, mobile phone finder only for strong matches, and async export or email-finder flows when you need verified emails.
-  Last reviewed: 2026-03-16
+  Last reviewed: 2026-04-30
 
 - [apify playbook](provider-playbooks/apify.md)
   Summary: Prefer sync run (`apify_run_actor_sync`) for actor execution. Use async run plus polling only when you need non-blocking execution. Reach for Apify before call_ai/WebSearch when the source is already known and a source-specific actor exists.
@@ -251,6 +251,10 @@ GTM time windows, thresholds, and interpretation rules are defined in the Defini
 - [deeplineagent playbook](provider-playbooks/deeplineagent.md)
   Summary: Use Vercel AI Gateway for plain inference or multi-step research with Deepline-managed tools and billing.
   Last reviewed: 2026-03-22
+
+- [discolike playbook](provider-playbooks/discolike.md)
+  Summary: Use discover or count for ICP expansion, bizdata for firmographic lookup, match when you start from a company name, and relationship datasets for vendors, public links, subsidiaries, and redirects.
+  Last reviewed: 2026-04-30
 
 - [dropleads playbook](provider-playbooks/dropleads.md)
   Summary: Use Prime-DB search/count first to scope segments efficiently, then run finder/verifier steps only on shortlisted records. Prefer companyDomains over companyNames, split multi-word keywords into separate tokens, and use broad jobTitles plus seniority instead of exact-title matching.

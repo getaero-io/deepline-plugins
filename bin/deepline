@@ -1,15 +1,14 @@
 #!/usr/bin/env sh
-# TEST BRANCH: fetches shiv from ngrok-tunneled local dev server.
-# This lets us iterate on CLI error messages without committing binaries.
-# Reverts to fetch-from-prod on main.
+# Deepline CLI shim. Execs the cached Python shiv. Self-healing: if the shiv
+# isn't present (cold cache, ephemeral cloud sandbox, or SessionStart hook
+# didn't fire), fetch it inline before exec.
 set -e
 
 CACHE_ROOT="${XDG_DATA_HOME:-$HOME/.local/share}/deepline-plugin"
 CACHE_DIR="$CACHE_ROOT/cli"
 SHIV="$CACHE_DIR/deepline.pyz"
 
-# Test-only fetch URL — points at the local dev server through ngrok.
-SHIV_FETCH_URL="${DEEPLINE_TEST_SHIV_URL:-https://6ead-136-36-246-228.ngrok-free.app/deepline.pyz}"
+SHIV_FETCH_URL="${DEEPLINE_CLI_FETCH_URL:-https://code.deepline.com/api/v2/cli/python}"
 
 if [ ! -x "$SHIV" ]; then
   mkdir -p "$CACHE_DIR"
@@ -24,17 +23,16 @@ if [ ! -x "$SHIV" ]; then
   fi
 fi
 
-# Cross-session auth persistence in ephemeral sandboxes.
+# Cross-session auth persistence in cloud sandboxes (Cowork, claude.ai/code).
 # Resolution order matches the CLI's _resolve_remote_workspace_dir:
 #   1. $CLAUDE_PROJECT_DIR (laptop and possibly future Cowork)
-#   2. $HOME/mnt/<workspace>/ — Cowork's connected-workspace mount;
-#      pick the first non-dot-prefixed directory.
+#   2. $HOME/mnt/deepline/ if present (deterministic if user named workspace 'deepline')
+#   3. $HOME/mnt/<workspace>/ — first non-system, non-dot dir under $HOME/mnt/
+#      (skips .claude, .remote-plugins, outputs, uploads)
 WORKSPACE_DIR="${CLAUDE_PROJECT_DIR:-}"
 if [ -z "$WORKSPACE_DIR" ] && [ -n "${HOME:-}" ] && [ -d "$HOME/mnt" ]; then
   case "$HOME" in
     /sessions/*)
-      # Prefer a folder explicitly named "deepline" if present (deterministic
-      # across multi-workspace setups); else first non-system, non-dot dir.
       if [ -d "$HOME/mnt/deepline" ]; then
         WORKSPACE_DIR="$HOME/mnt/deepline"
       else
@@ -53,18 +51,30 @@ if [ -z "$WORKSPACE_DIR" ] && [ -n "${HOME:-}" ] && [ -d "$HOME/mnt" ]; then
   esac
 fi
 if [ -n "$WORKSPACE_DIR" ] && [ -f "$WORKSPACE_DIR/.deepline/.env" ]; then
-  set -a
-  # shellcheck disable=SC1090
-  . "$WORKSPACE_DIR/.deepline/.env"
-  set +a
+  # Parse as data, NEVER source. The workspace is user/repo-controlled, so
+  # sourcing would let a malicious .deepline/.env execute arbitrary shell via
+  # $(...) or backticks in the value. Only DEEPLINE_API_KEY is supported here;
+  # any other lines are ignored.
+  while IFS='=' read -r _dl_key _dl_value; do
+    case "$_dl_key" in
+      DEEPLINE_API_KEY)
+        # Strip surrounding quotes (we never write them, but be tolerant).
+        _dl_value="${_dl_value%\"}"; _dl_value="${_dl_value#\"}"
+        _dl_value="${_dl_value%\'}"; _dl_value="${_dl_value#\'}"
+        export DEEPLINE_API_KEY="$_dl_value"
+        ;;
+    esac
+  done < "$WORKSPACE_DIR/.deepline/.env"
+  unset _dl_key _dl_value
 fi
 
-# Match the standalone bash installer's env wiring.
+# Match the standalone bash installer's env wiring so behavior is identical
+# whether the user has both installs or just the plugin. Notably aligns the
+# config scope so auth state is shared with the standalone CLI on machines
+# that have both.
 export DEEPLINE_API_BASE_URL="${DEEPLINE_API_BASE_URL:-https://code.deepline.com}"
 export DEEPLINE_CONFIG_SCOPE="${DEEPLINE_CONFIG_SCOPE:-code-deepline-com}"
 export DEEPLINE_INSTALL_METHOD="${DEEPLINE_INSTALL_METHOD:-shiv}"
 export DEEPLINE_REAL_BINARY="${DEEPLINE_REAL_BINARY:-$SHIV}"
-# Keep the test shiv stable — don't let prod self-update overwrite it.
-export DEEPLINE_SKIP_SELF_UPDATE="${DEEPLINE_SKIP_SELF_UPDATE:-1}"
 
 exec "$SHIV" "$@"

@@ -1,0 +1,1008 @@
+{
+  "version": "ae1a9a515410cf7f82004eba0d005584bc69cdc40c590699b8b34fce338147af",
+  "generated_at": "2026-05-05T23:13:03.775Z",
+  "base_url": "https://code.deepline.com",
+  "skills": [
+    {
+      "name": "build-tam",
+      "title": "Provider-Led Account And Contact Sourcing",
+      "description": "Build a Total Addressable Market list by sourcing accounts and contacts from providers like Apollo, Crustdata, and PDL.",
+      "entrypoint": "https://code.deepline.com/.well-known/skills/build-tam/SKILL.md",
+      "index_url": "https://code.deepline.com/.well-known/skills/index.json",
+      "documents": [
+        {
+          "path": "SKILL.md",
+          "url": "https://code.deepline.com/.well-known/skills/build-tam/SKILL.md",
+          "kind": "entrypoint",
+          "title": "Provider-Led Account And Contact Sourcing",
+          "providers": [],
+          "tags": [
+            "recipe"
+          ]
+        }
+      ],
+      "files": [
+        "SKILL.md",
+        "skill-metadata.json"
+      ]
+    },
+    {
+      "name": "clay-to-deepline",
+      "title": "Clay → Deepline Migration",
+      "description": "Convert a Clay table configuration into local Deepline scripts. Handles extraction (MCP or script), documentation, action mapping, script generation, and parity validation against Clay ground truth.",
+      "entrypoint": "https://code.deepline.com/.well-known/skills/clay-to-deepline/SKILL.md",
+      "index_url": "https://code.deepline.com/.well-known/skills/index.json",
+      "documents": [
+        {
+          "path": "SKILL.md",
+          "url": "https://code.deepline.com/.well-known/skills/clay-to-deepline/SKILL.md",
+          "kind": "entrypoint",
+          "title": "Clay → Deepline Migration",
+          "providers": [],
+          "tags": [
+            "recipe"
+          ]
+        }
+      ],
+      "files": [
+        "SKILL.md",
+        "skill-metadata.json"
+      ]
+    },
+    {
+      "name": "deepline-feedback",
+      "title": "deepline-feedback",
+      "description": "Send feedback or bug reports to the Deepline team, including session transcript and environment info.",
+      "entrypoint": "https://code.deepline.com/.well-known/skills/deepline-feedback/SKILL.md",
+      "index_url": "https://code.deepline.com/.well-known/skills/index.json",
+      "documents": [
+        {
+          "path": "SKILL.md",
+          "url": "https://code.deepline.com/.well-known/skills/deepline-feedback/SKILL.md",
+          "kind": "entrypoint",
+          "title": "Deepline Feedback",
+          "providers": [],
+          "tags": [
+            "feedback",
+            "session"
+          ]
+        }
+      ],
+      "files": [
+        "skill-metadata.json",
+        "SKILL.md"
+      ]
+    },
+    {
+      "name": "deepline-gtm",
+      "title": "GTM Meta Skill",
+      "description": "Use this skill for GTM prospecting, enrichment, qualification, and outbound workflows, especially when users mention Deepline, CSV processing, lead/account/contact research, waterfall enrichment, email or LinkedIn lookup, personalization, scoring, or campaign activation. Route CSV-heavy and provider-driven requests through this skill, then rely on linked sub-docs and provider playbooks for execution details. Available providers: adyntel, ai_ark, apify, apollo, attio, bettercontact, bloomberry, builtwith, cloudflare, contactout, crustdata, customer_db, dataforseo, datagma, deepline_native, deeplineagent, discolike, dropleads, exa, findymail, firecrawl, forager, fullenrich, generic_http, heyreach, hubspot, hunter, icypeas, instantly, ipqs, leadmagic, lemlist, linkedin_ads_audiences, lusha, openwebninja, parallel, peopledatalabs, prospeo, rocketreach, salesforce, serper, slack, smartlead, snowflake, theirstack, trestle, wiza, zerobounce.",
+      "entrypoint": "https://code.deepline.com/.well-known/skills/deepline-gtm/SKILL.md",
+      "index_url": "https://code.deepline.com/.well-known/skills/index.json",
+      "documents": [
+        {
+          "path": "agents/execution-plan-creator.md",
+          "url": "https://code.deepline.com/.well-known/skills/deepline-gtm/agents/execution-plan-creator.md",
+          "kind": "agent",
+          "title": "Execution Plan Creator",
+          "providers": [],
+          "tags": [
+            "agent",
+            "planning"
+          ]
+        },
+        {
+          "path": "agents/list-builder.md",
+          "url": "https://code.deepline.com/.well-known/skills/deepline-gtm/agents/list-builder.md",
+          "kind": "agent",
+          "title": "List Builder",
+          "providers": [],
+          "tags": [
+            "agent",
+            "prospecting"
+          ]
+        },
+        {
+          "path": "enriching-and-researching.md",
+          "url": "https://code.deepline.com/.well-known/skills/deepline-gtm/enriching-and-researching.md",
+          "kind": "guide",
+          "title": "Enriching and Researching",
+          "providers": [],
+          "tags": [
+            "enrichment",
+            "waterfall",
+            "signals"
+          ]
+        },
+        {
+          "path": "finding-companies-and-contacts.md",
+          "url": "https://code.deepline.com/.well-known/skills/deepline-gtm/finding-companies-and-contacts.md",
+          "kind": "guide",
+          "title": "Finding Companies and Contacts",
+          "providers": [],
+          "tags": [
+            "prospecting",
+            "search",
+            "discovery"
+          ]
+        },
+        {
+          "path": "provider-playbooks/adyntel.md",
+          "url": "https://code.deepline.com/.well-known/skills/deepline-gtm/provider-playbooks/adyntel.md",
+          "kind": "provider-playbook",
+          "title": "Provider Playbook",
+          "providers": [],
+          "tags": [
+            "provider"
+          ]
+        },
+        {
+          "path": "provider-playbooks/ai_ark.md",
+          "url": "https://code.deepline.com/.well-known/skills/deepline-gtm/provider-playbooks/ai_ark.md",
+          "kind": "provider-playbook",
+          "title": "Provider Playbook",
+          "providers": [],
+          "tags": [
+            "provider"
+          ]
+        },
+        {
+          "path": "provider-playbooks/apify.md",
+          "url": "https://code.deepline.com/.well-known/skills/deepline-gtm/provider-playbooks/apify.md",
+          "kind": "provider-playbook",
+          "title": "Provider Playbook",
+          "providers": [],
+          "tags": [
+            "provider"
+          ]
+        },
+        {
+          "path": "provider-playbooks/apollo.md",
+          "url": "https://code.deepline.com/.well-known/skills/deepline-gtm/provider-playbooks/apollo.md",
+          "kind": "provider-playbook",
+          "title": "Provider Playbook",
+          "providers": [],
+          "tags": [
+            "provider"
+          ]
+        },
+        {
+          "path": "provider-playbooks/attio.md",
+          "url": "https://code.deepline.com/.well-known/skills/deepline-gtm/provider-playbooks/attio.md",
+          "kind": "provider-playbook",
+          "title": "Provider Playbook",
+          "providers": [],
+          "tags": [
+            "provider"
+          ]
+        },
+        {
+          "path": "provider-playbooks/bettercontact.md",
+          "url": "https://code.deepline.com/.well-known/skills/deepline-gtm/provider-playbooks/bettercontact.md",
+          "kind": "provider-playbook",
+          "title": "Provider Playbook",
+          "providers": [],
+          "tags": [
+            "provider"
+          ]
+        },
+        {
+          "path": "provider-playbooks/bloomberry.md",
+          "url": "https://code.deepline.com/.well-known/skills/deepline-gtm/provider-playbooks/bloomberry.md",
+          "kind": "provider-playbook",
+          "title": "Provider Playbook",
+          "providers": [],
+          "tags": [
+            "provider"
+          ]
+        },
+        {
+          "path": "provider-playbooks/builtwith.md",
+          "url": "https://code.deepline.com/.well-known/skills/deepline-gtm/provider-playbooks/builtwith.md",
+          "kind": "provider-playbook",
+          "title": "Provider Playbook",
+          "providers": [],
+          "tags": [
+            "provider"
+          ]
+        },
+        {
+          "path": "provider-playbooks/cloudflare.md",
+          "url": "https://code.deepline.com/.well-known/skills/deepline-gtm/provider-playbooks/cloudflare.md",
+          "kind": "provider-playbook",
+          "title": "Provider Playbook",
+          "providers": [],
+          "tags": [
+            "provider"
+          ]
+        },
+        {
+          "path": "provider-playbooks/contactout.md",
+          "url": "https://code.deepline.com/.well-known/skills/deepline-gtm/provider-playbooks/contactout.md",
+          "kind": "provider-playbook",
+          "title": "Provider Playbook",
+          "providers": [],
+          "tags": [
+            "provider"
+          ]
+        },
+        {
+          "path": "provider-playbooks/crustdata.md",
+          "url": "https://code.deepline.com/.well-known/skills/deepline-gtm/provider-playbooks/crustdata.md",
+          "kind": "provider-playbook",
+          "title": "Provider Playbook",
+          "providers": [],
+          "tags": [
+            "provider"
+          ]
+        },
+        {
+          "path": "provider-playbooks/dataforseo.md",
+          "url": "https://code.deepline.com/.well-known/skills/deepline-gtm/provider-playbooks/dataforseo.md",
+          "kind": "provider-playbook",
+          "title": "Provider Playbook",
+          "providers": [],
+          "tags": [
+            "provider"
+          ]
+        },
+        {
+          "path": "provider-playbooks/datagma.md",
+          "url": "https://code.deepline.com/.well-known/skills/deepline-gtm/provider-playbooks/datagma.md",
+          "kind": "provider-playbook",
+          "title": "Provider Playbook",
+          "providers": [],
+          "tags": [
+            "provider"
+          ]
+        },
+        {
+          "path": "provider-playbooks/deepline_native.md",
+          "url": "https://code.deepline.com/.well-known/skills/deepline-gtm/provider-playbooks/deepline_native.md",
+          "kind": "provider-playbook",
+          "title": "Provider Playbook",
+          "providers": [],
+          "tags": [
+            "provider"
+          ]
+        },
+        {
+          "path": "provider-playbooks/deeplineagent.md",
+          "url": "https://code.deepline.com/.well-known/skills/deepline-gtm/provider-playbooks/deeplineagent.md",
+          "kind": "provider-playbook",
+          "title": "Provider Playbook",
+          "providers": [],
+          "tags": [
+            "provider"
+          ]
+        },
+        {
+          "path": "provider-playbooks/discolike.md",
+          "url": "https://code.deepline.com/.well-known/skills/deepline-gtm/provider-playbooks/discolike.md",
+          "kind": "provider-playbook",
+          "title": "Provider Playbook",
+          "providers": [],
+          "tags": [
+            "provider"
+          ]
+        },
+        {
+          "path": "provider-playbooks/dropleads.md",
+          "url": "https://code.deepline.com/.well-known/skills/deepline-gtm/provider-playbooks/dropleads.md",
+          "kind": "provider-playbook",
+          "title": "Provider Playbook",
+          "providers": [],
+          "tags": [
+            "provider"
+          ]
+        },
+        {
+          "path": "provider-playbooks/exa.md",
+          "url": "https://code.deepline.com/.well-known/skills/deepline-gtm/provider-playbooks/exa.md",
+          "kind": "provider-playbook",
+          "title": "Provider Playbook",
+          "providers": [],
+          "tags": [
+            "provider"
+          ]
+        },
+        {
+          "path": "provider-playbooks/findymail.md",
+          "url": "https://code.deepline.com/.well-known/skills/deepline-gtm/provider-playbooks/findymail.md",
+          "kind": "provider-playbook",
+          "title": "Provider Playbook",
+          "providers": [],
+          "tags": [
+            "provider"
+          ]
+        },
+        {
+          "path": "provider-playbooks/firecrawl.md",
+          "url": "https://code.deepline.com/.well-known/skills/deepline-gtm/provider-playbooks/firecrawl.md",
+          "kind": "provider-playbook",
+          "title": "Provider Playbook",
+          "providers": [],
+          "tags": [
+            "provider"
+          ]
+        },
+        {
+          "path": "provider-playbooks/forager.md",
+          "url": "https://code.deepline.com/.well-known/skills/deepline-gtm/provider-playbooks/forager.md",
+          "kind": "provider-playbook",
+          "title": "Provider Playbook",
+          "providers": [],
+          "tags": [
+            "provider"
+          ]
+        },
+        {
+          "path": "provider-playbooks/fullenrich.md",
+          "url": "https://code.deepline.com/.well-known/skills/deepline-gtm/provider-playbooks/fullenrich.md",
+          "kind": "provider-playbook",
+          "title": "Provider Playbook",
+          "providers": [],
+          "tags": [
+            "provider"
+          ]
+        },
+        {
+          "path": "provider-playbooks/generic_http.md",
+          "url": "https://code.deepline.com/.well-known/skills/deepline-gtm/provider-playbooks/generic_http.md",
+          "kind": "provider-playbook",
+          "title": "Provider Playbook",
+          "providers": [],
+          "tags": [
+            "provider"
+          ]
+        },
+        {
+          "path": "provider-playbooks/heyreach.md",
+          "url": "https://code.deepline.com/.well-known/skills/deepline-gtm/provider-playbooks/heyreach.md",
+          "kind": "provider-playbook",
+          "title": "Provider Playbook",
+          "providers": [],
+          "tags": [
+            "provider"
+          ]
+        },
+        {
+          "path": "provider-playbooks/hubspot.md",
+          "url": "https://code.deepline.com/.well-known/skills/deepline-gtm/provider-playbooks/hubspot.md",
+          "kind": "provider-playbook",
+          "title": "Provider Playbook",
+          "providers": [],
+          "tags": [
+            "provider"
+          ]
+        },
+        {
+          "path": "provider-playbooks/hunter.md",
+          "url": "https://code.deepline.com/.well-known/skills/deepline-gtm/provider-playbooks/hunter.md",
+          "kind": "provider-playbook",
+          "title": "Provider Playbook",
+          "providers": [],
+          "tags": [
+            "provider"
+          ]
+        },
+        {
+          "path": "provider-playbooks/icypeas.md",
+          "url": "https://code.deepline.com/.well-known/skills/deepline-gtm/provider-playbooks/icypeas.md",
+          "kind": "provider-playbook",
+          "title": "Provider Playbook",
+          "providers": [],
+          "tags": [
+            "provider"
+          ]
+        },
+        {
+          "path": "provider-playbooks/instantly.md",
+          "url": "https://code.deepline.com/.well-known/skills/deepline-gtm/provider-playbooks/instantly.md",
+          "kind": "provider-playbook",
+          "title": "Provider Playbook",
+          "providers": [],
+          "tags": [
+            "provider"
+          ]
+        },
+        {
+          "path": "provider-playbooks/ipqs.md",
+          "url": "https://code.deepline.com/.well-known/skills/deepline-gtm/provider-playbooks/ipqs.md",
+          "kind": "provider-playbook",
+          "title": "Provider Playbook",
+          "providers": [],
+          "tags": [
+            "provider"
+          ]
+        },
+        {
+          "path": "provider-playbooks/leadmagic.md",
+          "url": "https://code.deepline.com/.well-known/skills/deepline-gtm/provider-playbooks/leadmagic.md",
+          "kind": "provider-playbook",
+          "title": "Provider Playbook",
+          "providers": [],
+          "tags": [
+            "provider"
+          ]
+        },
+        {
+          "path": "provider-playbooks/lemlist.md",
+          "url": "https://code.deepline.com/.well-known/skills/deepline-gtm/provider-playbooks/lemlist.md",
+          "kind": "provider-playbook",
+          "title": "Provider Playbook",
+          "providers": [],
+          "tags": [
+            "provider"
+          ]
+        },
+        {
+          "path": "provider-playbooks/linkedin_ads_audiences.md",
+          "url": "https://code.deepline.com/.well-known/skills/deepline-gtm/provider-playbooks/linkedin_ads_audiences.md",
+          "kind": "provider-playbook",
+          "title": "Provider Playbook",
+          "providers": [],
+          "tags": [
+            "provider"
+          ]
+        },
+        {
+          "path": "provider-playbooks/lusha.md",
+          "url": "https://code.deepline.com/.well-known/skills/deepline-gtm/provider-playbooks/lusha.md",
+          "kind": "provider-playbook",
+          "title": "Provider Playbook",
+          "providers": [],
+          "tags": [
+            "provider"
+          ]
+        },
+        {
+          "path": "provider-playbooks/openwebninja.md",
+          "url": "https://code.deepline.com/.well-known/skills/deepline-gtm/provider-playbooks/openwebninja.md",
+          "kind": "provider-playbook",
+          "title": "Provider Playbook",
+          "providers": [],
+          "tags": [
+            "provider"
+          ]
+        },
+        {
+          "path": "provider-playbooks/parallel.md",
+          "url": "https://code.deepline.com/.well-known/skills/deepline-gtm/provider-playbooks/parallel.md",
+          "kind": "provider-playbook",
+          "title": "Provider Playbook",
+          "providers": [],
+          "tags": [
+            "provider"
+          ]
+        },
+        {
+          "path": "provider-playbooks/peopledatalabs.md",
+          "url": "https://code.deepline.com/.well-known/skills/deepline-gtm/provider-playbooks/peopledatalabs.md",
+          "kind": "provider-playbook",
+          "title": "Provider Playbook",
+          "providers": [],
+          "tags": [
+            "provider"
+          ]
+        },
+        {
+          "path": "provider-playbooks/prospeo.md",
+          "url": "https://code.deepline.com/.well-known/skills/deepline-gtm/provider-playbooks/prospeo.md",
+          "kind": "provider-playbook",
+          "title": "Provider Playbook",
+          "providers": [],
+          "tags": [
+            "provider"
+          ]
+        },
+        {
+          "path": "provider-playbooks/salesforce.md",
+          "url": "https://code.deepline.com/.well-known/skills/deepline-gtm/provider-playbooks/salesforce.md",
+          "kind": "provider-playbook",
+          "title": "Provider Playbook",
+          "providers": [],
+          "tags": [
+            "provider"
+          ]
+        },
+        {
+          "path": "provider-playbooks/serper.md",
+          "url": "https://code.deepline.com/.well-known/skills/deepline-gtm/provider-playbooks/serper.md",
+          "kind": "provider-playbook",
+          "title": "Provider Playbook",
+          "providers": [],
+          "tags": [
+            "provider"
+          ]
+        },
+        {
+          "path": "provider-playbooks/smartlead.md",
+          "url": "https://code.deepline.com/.well-known/skills/deepline-gtm/provider-playbooks/smartlead.md",
+          "kind": "provider-playbook",
+          "title": "Provider Playbook",
+          "providers": [],
+          "tags": [
+            "provider"
+          ]
+        },
+        {
+          "path": "provider-playbooks/theirstack.md",
+          "url": "https://code.deepline.com/.well-known/skills/deepline-gtm/provider-playbooks/theirstack.md",
+          "kind": "provider-playbook",
+          "title": "Provider Playbook",
+          "providers": [],
+          "tags": [
+            "provider"
+          ]
+        },
+        {
+          "path": "provider-playbooks/trestle.md",
+          "url": "https://code.deepline.com/.well-known/skills/deepline-gtm/provider-playbooks/trestle.md",
+          "kind": "provider-playbook",
+          "title": "Provider Playbook",
+          "providers": [],
+          "tags": [
+            "provider"
+          ]
+        },
+        {
+          "path": "provider-playbooks/wiza.md",
+          "url": "https://code.deepline.com/.well-known/skills/deepline-gtm/provider-playbooks/wiza.md",
+          "kind": "provider-playbook",
+          "title": "Provider Playbook",
+          "providers": [],
+          "tags": [
+            "provider"
+          ]
+        },
+        {
+          "path": "provider-playbooks/zerobounce.md",
+          "url": "https://code.deepline.com/.well-known/skills/deepline-gtm/provider-playbooks/zerobounce.md",
+          "kind": "provider-playbook",
+          "title": "Provider Playbook",
+          "providers": [],
+          "tags": [
+            "provider"
+          ]
+        },
+        {
+          "path": "recipes/build-tam.md",
+          "url": "https://code.deepline.com/.well-known/skills/deepline-gtm/recipes/build-tam.md",
+          "kind": "specialized-workflow",
+          "title": "Recipe",
+          "providers": [],
+          "tags": [
+            "recipe"
+          ]
+        },
+        {
+          "path": "recipes/clay-to-deepline.md",
+          "url": "https://code.deepline.com/.well-known/skills/deepline-gtm/recipes/clay-to-deepline.md",
+          "kind": "specialized-workflow",
+          "title": "Recipe",
+          "providers": [],
+          "tags": [
+            "recipe"
+          ]
+        },
+        {
+          "path": "recipes/linkedin-url-lookup.md",
+          "url": "https://code.deepline.com/.well-known/skills/deepline-gtm/recipes/linkedin-url-lookup.md",
+          "kind": "specialized-workflow",
+          "title": "Recipe",
+          "providers": [],
+          "tags": [
+            "recipe"
+          ]
+        },
+        {
+          "path": "recipes/portfolio-prospecting.md",
+          "url": "https://code.deepline.com/.well-known/skills/deepline-gtm/recipes/portfolio-prospecting.md",
+          "kind": "specialized-workflow",
+          "title": "Recipe",
+          "providers": [],
+          "tags": [
+            "recipe"
+          ]
+        },
+        {
+          "path": "recipes/small-business-prospecting.md",
+          "url": "https://code.deepline.com/.well-known/skills/deepline-gtm/recipes/small-business-prospecting.md",
+          "kind": "specialized-workflow",
+          "title": "Recipe",
+          "providers": [],
+          "tags": [
+            "recipe"
+          ]
+        },
+        {
+          "path": "recipes/workflows-hello-world.md",
+          "url": "https://code.deepline.com/.well-known/skills/deepline-gtm/recipes/workflows-hello-world.md",
+          "kind": "specialized-workflow",
+          "title": "Recipe",
+          "providers": [],
+          "tags": [
+            "recipe"
+          ]
+        },
+        {
+          "path": "references/clay-action-mappings.md",
+          "url": "https://code.deepline.com/.well-known/skills/deepline-gtm/references/clay-action-mappings.md",
+          "kind": "other",
+          "title": "Document",
+          "providers": [],
+          "tags": []
+        },
+        {
+          "path": "references/clay-extraction.md",
+          "url": "https://code.deepline.com/.well-known/skills/deepline-gtm/references/clay-extraction.md",
+          "kind": "other",
+          "title": "Document",
+          "providers": [],
+          "tags": []
+        },
+        {
+          "path": "references/cloud-workflow-builder.md",
+          "url": "https://code.deepline.com/.well-known/skills/deepline-gtm/references/cloud-workflow-builder.md",
+          "kind": "other",
+          "title": "Document",
+          "providers": [],
+          "tags": []
+        },
+        {
+          "path": "references/cloud-workflow-migrations.md",
+          "url": "https://code.deepline.com/.well-known/skills/deepline-gtm/references/cloud-workflow-migrations.md",
+          "kind": "other",
+          "title": "Document",
+          "providers": [],
+          "tags": []
+        },
+        {
+          "path": "SKILL.md",
+          "url": "https://code.deepline.com/.well-known/skills/deepline-gtm/SKILL.md",
+          "kind": "entrypoint",
+          "title": "GTM Meta Skill",
+          "providers": [],
+          "tags": [
+            "gtm",
+            "router"
+          ]
+        },
+        {
+          "path": "writing-outreach.md",
+          "url": "https://code.deepline.com/.well-known/skills/deepline-gtm/writing-outreach.md",
+          "kind": "guide",
+          "title": "Writing Outreach",
+          "providers": [],
+          "tags": [
+            "qualification",
+            "email",
+            "outreach"
+          ]
+        }
+      ],
+      "files": [
+        "agents/execution-plan-creator.md",
+        "agents/list-builder.md",
+        "claude-deepline-statusline.mjs",
+        "enriching-and-researching.md",
+        "finding-companies-and-contacts.md",
+        "prompts.json",
+        "provider-playbooks/adyntel.md",
+        "provider-playbooks/ai_ark.md",
+        "provider-playbooks/apify.md",
+        "provider-playbooks/apollo.md",
+        "provider-playbooks/attio.md",
+        "provider-playbooks/bettercontact.md",
+        "provider-playbooks/bloomberry.md",
+        "provider-playbooks/builtwith.md",
+        "provider-playbooks/cloudflare.md",
+        "provider-playbooks/contactout.md",
+        "provider-playbooks/crustdata.md",
+        "provider-playbooks/dataforseo.md",
+        "provider-playbooks/datagma.md",
+        "provider-playbooks/deepline_native.md",
+        "provider-playbooks/deeplineagent.md",
+        "provider-playbooks/discolike.md",
+        "provider-playbooks/dropleads.md",
+        "provider-playbooks/exa.md",
+        "provider-playbooks/findymail.md",
+        "provider-playbooks/firecrawl.md",
+        "provider-playbooks/forager.md",
+        "provider-playbooks/fullenrich.md",
+        "provider-playbooks/generic_http.md",
+        "provider-playbooks/heyreach.md",
+        "provider-playbooks/hubspot.md",
+        "provider-playbooks/hunter.md",
+        "provider-playbooks/icypeas.md",
+        "provider-playbooks/instantly.md",
+        "provider-playbooks/ipqs.md",
+        "provider-playbooks/leadmagic.md",
+        "provider-playbooks/lemlist.md",
+        "provider-playbooks/linkedin_ads_audiences.md",
+        "provider-playbooks/lusha.md",
+        "provider-playbooks/openwebninja.md",
+        "provider-playbooks/parallel.md",
+        "provider-playbooks/peopledatalabs.md",
+        "provider-playbooks/prospeo.md",
+        "provider-playbooks/salesforce.md",
+        "provider-playbooks/serper.md",
+        "provider-playbooks/smartlead.md",
+        "provider-playbooks/theirstack.md",
+        "provider-playbooks/trestle.md",
+        "provider-playbooks/wiza.md",
+        "provider-playbooks/zerobounce.md",
+        "recipes/build-tam.md",
+        "recipes/clay-to-deepline.md",
+        "recipes/linkedin-url-lookup.md",
+        "recipes/portfolio-prospecting.md",
+        "recipes/small-business-prospecting.md",
+        "recipes/workflows-hello-world.md",
+        "references/clay-action-mappings.md",
+        "references/clay-extraction.md",
+        "references/cloud-workflow-builder.md",
+        "references/cloud-workflow-migrations.md",
+        "scripts/clay-extract.py",
+        "scripts/fixtures_name_validation.json",
+        "scripts/validate-emails.py",
+        "scripts/validate-linkedin-names.py",
+        "skill-metadata.json",
+        "SKILL.md",
+        "writing-outreach.md"
+      ]
+    },
+    {
+      "name": "deepline-quickstart",
+      "title": "deepline-quickstart",
+      "description": "Run a quick Deepline demo recipe to show the user how Deepline works.",
+      "entrypoint": "https://code.deepline.com/.well-known/skills/deepline-quickstart/SKILL.md",
+      "index_url": "https://code.deepline.com/.well-known/skills/index.json",
+      "documents": [
+        {
+          "path": "SKILL.md",
+          "url": "https://code.deepline.com/.well-known/skills/deepline-quickstart/SKILL.md",
+          "kind": "entrypoint",
+          "title": "Deepline Quickstart Demo",
+          "providers": [
+            "dropleads",
+            "apollo"
+          ],
+          "tags": [
+            "quickstart",
+            "demo",
+            "prospecting"
+          ]
+        }
+      ],
+      "files": [
+        "skill-metadata.json",
+        "SKILL.md"
+      ]
+    },
+    {
+      "name": "gtm-meta-skill",
+      "title": "GTM Meta Skill",
+      "description": "[DEPRECATED — use deepline-gtm] Use this skill for GTM prospecting, enrichment, qualification, and outbound workflows, especially when users mention Deepline, CSV processing, lead/account/contact research, waterfall enrichment, email or LinkedIn lookup, personalization, scoring, or campaign activation. Route CSV-heavy and provider-driven requests through this skill, then rely on linked sub-docs and provider playbooks for execution details. Available providers: adyntel, ai_ark, apify, apollo, attio, bettercontact, bloomberry, builtwith, cloudflare, contactout, crustdata, customer_db, dataforseo, datagma, deepline_native, deeplineagent, discolike, dropleads, exa, findymail, firecrawl, forager, fullenrich, generic_http, heyreach, hubspot, hunter, icypeas, instantly, ipqs, leadmagic, lemlist, linkedin_ads_audiences, lusha, openwebninja, parallel, peopledatalabs, prospeo, rocketreach, salesforce, serper, slack, smartlead, snowflake, theirstack, trestle, wiza, zerobounce.",
+      "entrypoint": "https://code.deepline.com/.well-known/skills/gtm-meta-skill/SKILL.md",
+      "index_url": "https://code.deepline.com/.well-known/skills/index.json",
+      "documents": [
+        {
+          "path": "SKILL.md",
+          "url": "https://code.deepline.com/.well-known/skills/gtm-meta-skill/SKILL.md",
+          "kind": "entrypoint",
+          "title": "GTM Meta Skill",
+          "providers": [],
+          "tags": [
+            "deprecated"
+          ]
+        }
+      ],
+      "files": [
+        "SKILL.md",
+        "skill-metadata.json"
+      ]
+    },
+    {
+      "name": "linkedin-url-lookup",
+      "title": "LinkedIn URL Lookup",
+      "description": "Resolve LinkedIn profile URLs from name + company with strict identity validation to avoid false positives.",
+      "entrypoint": "https://code.deepline.com/.well-known/skills/linkedin-url-lookup/SKILL.md",
+      "index_url": "https://code.deepline.com/.well-known/skills/index.json",
+      "documents": [
+        {
+          "path": "SKILL.md",
+          "url": "https://code.deepline.com/.well-known/skills/linkedin-url-lookup/SKILL.md",
+          "kind": "entrypoint",
+          "title": "LinkedIn URL Lookup",
+          "providers": [],
+          "tags": [
+            "recipe"
+          ]
+        }
+      ],
+      "files": [
+        "SKILL.md",
+        "skill-metadata.json"
+      ]
+    },
+    {
+      "name": "niche-signal-discovery",
+      "title": "niche-signal-discovery",
+      "description": "Discover niche first-party signals that differentiate Closed Won vs Closed Lost accounts for ICP analysis. Use when the user provides won/lost customer domain lists and wants differential signals (website content, job listings, tech stack, maturity markers) to build account scoring models and prospecting criteria. Triggers: ICP analysis, niche signals, won vs lost analysis, differential signals, signal discovery, ICP signal report, account scoring signals, lead scoring, first-party signals, buyer signals. Before reading this file, first read deepline-gtm to understand the Deepline CLI tool and how to use it. Then read this file for guidance on the task.",
+      "entrypoint": "https://code.deepline.com/.well-known/skills/niche-signal-discovery/SKILL.md",
+      "index_url": "https://code.deepline.com/.well-known/skills/index.json",
+      "documents": [
+        {
+          "path": "references/dedupe.md",
+          "url": "https://code.deepline.com/.well-known/skills/niche-signal-discovery/references/dedupe.md",
+          "kind": "guide",
+          "title": "Dedupe Against Existing List",
+          "providers": [],
+          "tags": [
+            "prospecting",
+            "dedupe"
+          ]
+        },
+        {
+          "path": "references/keyword-catalog.md",
+          "url": "https://code.deepline.com/.well-known/skills/niche-signal-discovery/references/keyword-catalog.md",
+          "kind": "guide",
+          "title": "Keyword Catalog",
+          "providers": [],
+          "tags": [
+            "signals"
+          ]
+        },
+        {
+          "path": "references/pitfalls.md",
+          "url": "https://code.deepline.com/.well-known/skills/niche-signal-discovery/references/pitfalls.md",
+          "kind": "guide",
+          "title": "Common Pitfalls",
+          "providers": [],
+          "tags": [
+            "signals",
+            "troubleshooting"
+          ]
+        },
+        {
+          "path": "references/proven-signals.md",
+          "url": "https://code.deepline.com/.well-known/skills/niche-signal-discovery/references/proven-signals.md",
+          "kind": "guide",
+          "title": "Proven Signal Patterns",
+          "providers": [],
+          "tags": [
+            "signals",
+            "scoring"
+          ]
+        },
+        {
+          "path": "references/quality-gate.md",
+          "url": "https://code.deepline.com/.well-known/skills/niche-signal-discovery/references/quality-gate.md",
+          "kind": "guide",
+          "title": "Quality Gate",
+          "providers": [],
+          "tags": [
+            "enrichment",
+            "qa"
+          ]
+        },
+        {
+          "path": "references/report-template.md",
+          "url": "https://code.deepline.com/.well-known/skills/niche-signal-discovery/references/report-template.md",
+          "kind": "guide",
+          "title": "Report Template",
+          "providers": [],
+          "tags": [
+            "reporting"
+          ]
+        },
+        {
+          "path": "references/scoring-pitfalls.md",
+          "url": "https://code.deepline.com/.well-known/skills/niche-signal-discovery/references/scoring-pitfalls.md",
+          "kind": "guide",
+          "title": "Scoring Pitfalls — Confirmation-Biased Fields",
+          "providers": [],
+          "tags": [
+            "signals",
+            "scoring"
+          ]
+        },
+        {
+          "path": "references/signal-interpretation.md",
+          "url": "https://code.deepline.com/.well-known/skills/niche-signal-discovery/references/signal-interpretation.md",
+          "kind": "guide",
+          "title": "Signal Interpretation",
+          "providers": [],
+          "tags": [
+            "signals"
+          ]
+        },
+        {
+          "path": "references/step-7-prospects.md",
+          "url": "https://code.deepline.com/.well-known/skills/niche-signal-discovery/references/step-7-prospects.md",
+          "kind": "guide",
+          "title": "Step 7 — Top 10 Prospects",
+          "providers": [],
+          "tags": [
+            "prospecting",
+            "contacts"
+          ]
+        },
+        {
+          "path": "SKILL.md",
+          "url": "https://code.deepline.com/.well-known/skills/niche-signal-discovery/SKILL.md",
+          "kind": "entrypoint",
+          "title": "Niche Signal Discovery",
+          "providers": [],
+          "tags": [
+            "signals",
+            "icp"
+          ]
+        }
+      ],
+      "files": [
+        "references/dedupe.md",
+        "references/keyword-catalog.md",
+        "references/pitfalls.md",
+        "references/proven-signals.md",
+        "references/quality-gate.md",
+        "references/report-template.md",
+        "references/scoring-pitfalls.md",
+        "references/signal-interpretation.md",
+        "references/step-7-prospects.md",
+        "scripts/analyze_signals.py",
+        "scripts/dedupe_utils.py",
+        "scripts/find_contacts.py",
+        "skill-metadata.json",
+        "SKILL.md"
+      ]
+    },
+    {
+      "name": "portfolio-prospecting",
+      "title": "Portfolio/VC Prospecting",
+      "description": "Find companies backed by a specific investor or accelerator, then find contacts and build personalized outbound.",
+      "entrypoint": "https://code.deepline.com/.well-known/skills/portfolio-prospecting/SKILL.md",
+      "index_url": "https://code.deepline.com/.well-known/skills/index.json",
+      "documents": [
+        {
+          "path": "SKILL.md",
+          "url": "https://code.deepline.com/.well-known/skills/portfolio-prospecting/SKILL.md",
+          "kind": "entrypoint",
+          "title": "Portfolio/VC Prospecting",
+          "providers": [],
+          "tags": [
+            "recipe"
+          ]
+        }
+      ],
+      "files": [
+        "SKILL.md",
+        "skill-metadata.json"
+      ]
+    },
+    {
+      "name": "workflow-hello-world",
+      "title": "Cloud Workflow Triggers",
+      "description": "Create a cloud Deepline workflow that runs on a recurring cron schedule or via webhook, inspect it, and validate trigger behavior end to end.",
+      "entrypoint": "https://code.deepline.com/.well-known/skills/workflow-hello-world/SKILL.md",
+      "index_url": "https://code.deepline.com/.well-known/skills/index.json",
+      "documents": [
+        {
+          "path": "SKILL.md",
+          "url": "https://code.deepline.com/.well-known/skills/workflow-hello-world/SKILL.md",
+          "kind": "entrypoint",
+          "title": "Cloud Workflow Triggers",
+          "providers": [],
+          "tags": [
+            "recipe"
+          ]
+        }
+      ],
+      "files": [
+        "SKILL.md",
+        "skill-metadata.json"
+      ]
+    }
+  ]
+}
