@@ -33,16 +33,22 @@ WORKSPACE_DIR="${CLAUDE_PROJECT_DIR:-}"
 if [ -z "$WORKSPACE_DIR" ] && [ -n "${HOME:-}" ] && [ -d "$HOME/mnt" ]; then
   case "$HOME" in
     /sessions/*)
-      for _candidate in "$HOME"/mnt/*/; do
-        [ -d "$_candidate" ] || continue
-        _basename="${_candidate%/}"
-        _basename="${_basename##*/}"
-        case "$_basename" in
-          .*|outputs|uploads) continue ;;
-        esac
-        WORKSPACE_DIR="${_candidate%/}"
-        break
-      done
+      # Prefer a folder explicitly named "deepline" if present (deterministic
+      # across multi-workspace setups); else first non-system, non-dot dir.
+      if [ -d "$HOME/mnt/deepline" ]; then
+        WORKSPACE_DIR="$HOME/mnt/deepline"
+      else
+        for _candidate in "$HOME"/mnt/*/; do
+          [ -d "$_candidate" ] || continue
+          _basename="${_candidate%/}"
+          _basename="${_basename##*/}"
+          case "$_basename" in
+            .*|outputs|uploads) continue ;;
+          esac
+          WORKSPACE_DIR="${_candidate%/}"
+          break
+        done
+      fi
       ;;
   esac
 fi
