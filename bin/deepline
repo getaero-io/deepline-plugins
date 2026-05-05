@@ -38,7 +38,7 @@ if [ -z "$WORKSPACE_DIR" ] && [ -n "${HOME:-}" ] && [ -d "$HOME/mnt" ]; then
         _basename="${_candidate%/}"
         _basename="${_basename##*/}"
         case "$_basename" in
-          .*) continue ;;
+          .*|outputs|uploads) continue ;;
         esac
         WORKSPACE_DIR="${_candidate%/}"
         break
