@@ -34,12 +34,9 @@ if [ -f "$WORKSPACE_ENV" ]; then
   set +a
 fi
 
-# TEST BRANCH: route CLI API calls through ngrok → local dev server
-# (currently the snowflake-semantic-tool worktree on :3071).
-# Reverts to prod API on real main.
-export DEEPLINE_API_BASE_URL="${DEEPLINE_API_BASE_URL:-https://6ead-136-36-246-228.ngrok-free.app}"
-# Distinct scope keeps test auth state from colliding with prod auth state.
-export DEEPLINE_CONFIG_SCOPE="${DEEPLINE_CONFIG_SCOPE:-ngrok-test}"
+# Match the standalone bash installer's env wiring.
+export DEEPLINE_API_BASE_URL="${DEEPLINE_API_BASE_URL:-https://code.deepline.com}"
+export DEEPLINE_CONFIG_SCOPE="${DEEPLINE_CONFIG_SCOPE:-code-deepline-com}"
 export DEEPLINE_INSTALL_METHOD="${DEEPLINE_INSTALL_METHOD:-shiv}"
 export DEEPLINE_REAL_BINARY="${DEEPLINE_REAL_BINARY:-$SHIV}"
 # Keep the test shiv stable — don't let prod self-update overwrite it.
