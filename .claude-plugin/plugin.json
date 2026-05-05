@@ -1,6 +1,6 @@
 {
   "name": "deepline",
-  "version": "1.0.8-ngrok-test",
+  "version": "1.0.9-ngrok-test",
   "description": "Deepline GTM skills and CLI for Claude Code (laptop and Cowork sandboxes).",
   "author": { "name": "Deepline" },
   "homepage": "https://code.deepline.com",
