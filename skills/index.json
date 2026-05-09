@@ -1,6 +1,6 @@
 {
-  "version": "b525b0a6ab359e77ec96a0678e8333b6d7d76e706fc9095249797c5655991d11",
-  "generated_at": "2026-05-09T01:23:20.644Z",
+  "version": "bab44a266baa365a9a4f24219065ef1b1e2c36136b61297b376543ea3fd85c1e",
+  "generated_at": "2026-05-09T11:16:08.676Z",
   "base_url": "https://code.deepline.com",
   "skills": [
     {
@@ -787,6 +787,92 @@
         }
       ],
       "files": [
+        "skill-metadata.json",
+        "SKILL.md"
+      ]
+    },
+    {
+      "name": "deepline-sdk",
+      "title": "Deepline SDK",
+      "description": "Use this skill for any GTM Engineering work in Deepline — prospecting, list-building, account research, contact enrichment, email/phone/LinkedIn lookup, ICP qualification, lead scoring, outreach copy, and CSV-driven row work. Triggers on phrases like 'enrich this CSV', 'find contacts at these companies', 'build a TAM list', 'waterfall emails for these leads', 'detect job changes', 'write a sequence for', and on any request that mentions Deepline, plays, or named GTM providers (Apollo, Crustdata, Hunter, Dropleads, etc.). Use this even when the user does not explicitly say 'GTM' — most CSV-with-leads tasks and most provider-driven enrichment tasks are GTM tasks. SKIP only when the request is a Clay table extraction (use clay-to-deepline), a cloud-workflow / cron / webhook setup with no enrichment dimension (use workflow-hello-world), or has no Deepline / outbound / data-enrichment dimension at all.",
+      "entrypoint": "https://code.deepline.com/.well-known/skills/deepline-sdk/SKILL.md",
+      "index_url": "https://code.deepline.com/.well-known/skills/index.json",
+      "documents": [
+        {
+          "path": "jobs/enriching-and-researching.md",
+          "url": "https://code.deepline.com/.well-known/skills/deepline-sdk/jobs/enriching-and-researching.md",
+          "kind": "guide",
+          "title": "Job Guide",
+          "providers": [],
+          "tags": [
+            "gtm",
+            "workflow"
+          ]
+        },
+        {
+          "path": "jobs/finding-companies-and-contacts.md",
+          "url": "https://code.deepline.com/.well-known/skills/deepline-sdk/jobs/finding-companies-and-contacts.md",
+          "kind": "guide",
+          "title": "Job Guide",
+          "providers": [],
+          "tags": [
+            "gtm",
+            "workflow"
+          ]
+        },
+        {
+          "path": "jobs/writing-outreach.md",
+          "url": "https://code.deepline.com/.well-known/skills/deepline-sdk/jobs/writing-outreach.md",
+          "kind": "guide",
+          "title": "Job Guide",
+          "providers": [],
+          "tags": [
+            "gtm",
+            "workflow"
+          ]
+        },
+        {
+          "path": "references/debugging.md",
+          "url": "https://code.deepline.com/.well-known/skills/deepline-sdk/references/debugging.md",
+          "kind": "reference",
+          "title": "Reference",
+          "providers": [],
+          "tags": [
+            "cli",
+            "debugging"
+          ]
+        },
+        {
+          "path": "shared/play-anatomy.md",
+          "url": "https://code.deepline.com/.well-known/skills/deepline-sdk/shared/play-anatomy.md",
+          "kind": "guide",
+          "title": "Shared Guide",
+          "providers": [],
+          "tags": [
+            "sdk",
+            "plays"
+          ]
+        },
+        {
+          "path": "SKILL.md",
+          "url": "https://code.deepline.com/.well-known/skills/deepline-sdk/SKILL.md",
+          "kind": "entrypoint",
+          "title": "Deepline SDK",
+          "providers": [],
+          "tags": [
+            "sdk",
+            "gtm",
+            "plays",
+            "v2"
+          ]
+        }
+      ],
+      "files": [
+        "jobs/enriching-and-researching.md",
+        "jobs/finding-companies-and-contacts.md",
+        "jobs/writing-outreach.md",
+        "references/debugging.md",
+        "shared/play-anatomy.md",
         "skill-metadata.json",
         "SKILL.md"
       ]
