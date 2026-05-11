@@ -18,13 +18,14 @@ In Cowork, add Deepline as a personal plugin:
    ```
 
 5. Install the `deepline` plugin.
+6. Enable internet access for **all domains** in the Cowork session settings.
 
 ![Deepline installed in Cowork plugins](assets/cowork-plugin-directory.png)
 
-6. Start a Cowork session and run:
+7. Start a Cowork session and run:
 
    ```text
-   /deepline:deepline-quickstart
+   /deepline-quickstart
    ```
 
 ![Deepline quickstart running in Cowork](assets/cowork-quickstart.png)
@@ -44,7 +45,7 @@ Inside Claude Code, run:
 Then try:
 
 ```text
-/deepline:deepline-quickstart
+/deepline-quickstart
 ```
 
 ## Auth
