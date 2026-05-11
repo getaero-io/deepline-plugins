@@ -1,80 +1,112 @@
 #!/usr/bin/env sh
-# Deepline CLI shim. Execs the cached Python shiv. Self-healing: if the shiv
-# isn't present (cold cache, ephemeral cloud sandbox, or SessionStart hook
-# didn't fire), fetch it inline before exec.
+# Deepline plugin bootstrap. Claude Code and Cowork put plugin bin/ entries on
+# PATH, so this makes `deepline ...` work before any user-level CLI install
+# exists. The real CLI is installed through the canonical Deepline installer.
 set -e
 
-CACHE_ROOT="${XDG_DATA_HOME:-$HOME/.local/share}/deepline-plugin"
-CACHE_DIR="$CACHE_ROOT/cli"
-SHIV="$CACHE_DIR/deepline.pyz"
+INSTALL_URL="${DEEPLINE_CLI_INSTALL_URL:-https://code.deepline.com/api/v2/cli/install}"
+INSTALL_DIR="${DEEPLINE_INSTALL_DIR:-$HOME/.local/bin}"
+REAL="$INSTALL_DIR/deepline"
+PLUGIN_BIN_DIR="$(CDPATH= cd -- "$(dirname -- "$0")" 2>/dev/null && pwd -P)"
+PLUGIN_ROOT="$(CDPATH= cd -- "$PLUGIN_BIN_DIR/.." 2>/dev/null && pwd -P)"
 
-SHIV_FETCH_URL="${DEEPLINE_CLI_FETCH_URL:-https://code.deepline.com/api/v2/cli/python}"
-
-if [ ! -x "$SHIV" ]; then
-  mkdir -p "$CACHE_DIR"
-  TMP="$(mktemp "${TMPDIR:-/tmp}/deepline-shiv.XXXXXX")"
-  if curl -fsSL "$SHIV_FETCH_URL" -o "$TMP"; then
-    chmod +x "$TMP"
-    mv "$TMP" "$SHIV"
-  else
-    rm -f "$TMP"
-    echo "deepline: failed to fetch CLI shiv from $SHIV_FETCH_URL" >&2
-    exit 127
-  fi
+export DEEPLINE_PLUGIN_MODE="${DEEPLINE_PLUGIN_MODE:-true}"
+export DEEPLINE_PLUGIN_ROOT="${DEEPLINE_PLUGIN_ROOT:-$PLUGIN_ROOT}"
+if [ -d "$PLUGIN_ROOT/skills" ]; then
+  export DEEPLINE_PLUGIN_SKILLS_DIR="${DEEPLINE_PLUGIN_SKILLS_DIR:-$PLUGIN_ROOT/skills}"
 fi
 
-# Cross-session auth persistence in cloud sandboxes (Cowork, claude.ai/code).
-# Resolution order matches the CLI's _resolve_remote_workspace_dir:
-#   1. $CLAUDE_PROJECT_DIR (laptop and possibly future Cowork)
-#   2. $HOME/mnt/deepline/ if present (deterministic if user named workspace 'deepline')
-#   3. $HOME/mnt/<workspace>/ — first non-system, non-dot dir under $HOME/mnt/
-#      (skips .claude, .remote-plugins, outputs, uploads)
-WORKSPACE_DIR="${CLAUDE_PROJECT_DIR:-}"
-if [ -z "$WORKSPACE_DIR" ] && [ -n "${HOME:-}" ] && [ -d "$HOME/mnt" ]; then
-  case "$HOME" in
-    /sessions/*)
-      if [ -d "$HOME/mnt/deepline" ]; then
-        WORKSPACE_DIR="$HOME/mnt/deepline"
-      else
-        for _candidate in "$HOME"/mnt/*/; do
-          [ -d "$_candidate" ] || continue
-          _basename="${_candidate%/}"
-          _basename="${_basename##*/}"
-          case "$_basename" in
-            .*|outputs|uploads) continue ;;
-          esac
-          WORKSPACE_DIR="${_candidate%/}"
-          break
-        done
-      fi
+resolve_workspace_dir() {
+  if [ -n "${CLAUDE_PROJECT_DIR:-}" ] && [ -d "$CLAUDE_PROJECT_DIR" ]; then
+    printf '%s\n' "$CLAUDE_PROJECT_DIR"
+    return 0
+  fi
+
+  case "${HOME:-}" in
+    /sessions/*) ;;
+    *)
+      case "${CLAUDE_CODE_REMOTE:-}" in
+        1|true|TRUE|yes|YES|on|ON) ;;
+        *) return 0 ;;
+      esac
       ;;
   esac
-fi
-if [ -n "$WORKSPACE_DIR" ] && [ -f "$WORKSPACE_DIR/.deepline/.env" ]; then
-  # Parse as data, NEVER source. The workspace is user/repo-controlled, so
-  # sourcing would let a malicious .deepline/.env execute arbitrary shell via
-  # $(...) or backticks in the value. Only DEEPLINE_API_KEY is supported here;
-  # any other lines are ignored.
-  while IFS='=' read -r _dl_key _dl_value; do
-    case "$_dl_key" in
+
+  if [ ! -d "$HOME/mnt" ]; then
+    return 0
+  fi
+
+  if [ -d "$HOME/mnt/deepline" ]; then
+    printf '%s\n' "$HOME/mnt/deepline"
+    return 0
+  fi
+
+  for candidate in "$HOME"/mnt/*/; do
+    [ -d "$candidate" ] || continue
+    basename="${candidate%/}"
+    basename="${basename##*/}"
+    case "$basename" in
+      .*|outputs|uploads) continue ;;
+    esac
+    printf '%s\n' "${candidate%/}"
+    return 0
+  done
+}
+
+export_workspace_api_key() {
+  workspace_dir="$(resolve_workspace_dir)"
+  if [ -z "$workspace_dir" ]; then
+    return 0
+  fi
+
+  workspace_env="$workspace_dir/.deepline/.env"
+  if [ ! -f "$workspace_env" ]; then
+    return 0
+  fi
+
+  # Parse as data, never source. The workspace is user/repo-controlled.
+  while IFS='=' read -r key value; do
+    case "$key" in
       DEEPLINE_API_KEY)
-        # Strip surrounding quotes (we never write them, but be tolerant).
-        _dl_value="${_dl_value%\"}"; _dl_value="${_dl_value#\"}"
-        _dl_value="${_dl_value%\'}"; _dl_value="${_dl_value#\'}"
-        export DEEPLINE_API_KEY="$_dl_value"
+        value="${value%\"}"; value="${value#\"}"
+        value="${value%\'}"; value="${value#\'}"
+        export DEEPLINE_API_KEY="$value"
+        return 0
         ;;
     esac
-  done < "$WORKSPACE_DIR/.deepline/.env"
-  unset _dl_key _dl_value
+  done < "$workspace_env"
+}
+
+install_canonical_cli() {
+  if [ "$0" = "$REAL" ]; then
+    echo "deepline: refusing to bootstrap recursively from $REAL" >&2
+    exit 127
+  fi
+
+  if curl -fsSL "$INSTALL_URL" | \
+    DEEPLINE_INSTALLER_MODE=true \
+    DEEPLINE_INSTALLER_SKIP_AUTH=true \
+    DEEPLINE_INSTALLER_SKIP_PATH=true \
+    DEEPLINE_INSTALLER_SKIP_QUICKSTART=true \
+    DEEPLINE_INSTALLER_SKIP_AGENT_SKILL_INSTALL=true \
+    DEEPLINE_INSTALL_DIR="$INSTALL_DIR" \
+    sh; then
+    return 0
+  fi
+
+  echo "deepline: failed to install CLI from $INSTALL_URL" >&2
+  exit 127
+}
+
+export_workspace_api_key
+
+if [ ! -x "$REAL" ]; then
+  install_canonical_cli
 fi
 
-# Match the standalone bash installer's env wiring so behavior is identical
-# whether the user has both installs or just the plugin. Notably aligns the
-# config scope so auth state is shared with the standalone CLI on machines
-# that have both.
-export DEEPLINE_API_BASE_URL="${DEEPLINE_API_BASE_URL:-https://code.deepline.com}"
-export DEEPLINE_CONFIG_SCOPE="${DEEPLINE_CONFIG_SCOPE:-code-deepline-com}"
-export DEEPLINE_INSTALL_METHOD="${DEEPLINE_INSTALL_METHOD:-shiv}"
-export DEEPLINE_REAL_BINARY="${DEEPLINE_REAL_BINARY:-$SHIV}"
+if [ ! -x "$REAL" ]; then
+  echo "deepline: installer completed but $REAL is not executable" >&2
+  exit 127
+fi
 
-exec "$SHIV" "$@"
+exec "$REAL" "$@"

@@ -5,7 +5,7 @@ Deepline GTM skills + CLI for [Claude Code](https://code.claude.com), distribute
 ## What you get
 
 - **Skills** under the `/deepline:*` namespace — `deepline-gtm`, `deepline-quickstart`, `deepline-feedback`, plus recipe wrappers (`build-tam`, `portfolio-prospecting`, `linkedin-url-lookup`, etc.)
-- **CLI** auto-installed on first invocation. The plugin's shim fetches the latest Deepline CLI from `code.deepline.com` and caches it locally — no separate install step.
+- **CLI** auto-installed on first invocation. The plugin's shim runs the standard Deepline installer from `code.deepline.com`, then delegates to the installed CLI — no separate install step.
 - **Auth** handled via the standard browser-approval flow. Existing standalone-CLI auth state on your laptop is reused automatically; Cowork sandboxes complete a one-click claim per session.
 
 ## Install
@@ -16,7 +16,7 @@ Deepline GTM skills + CLI for [Claude Code](https://code.claude.com), distribute
 /reload-plugins
 ```
 
-Then start a fresh Claude Code session so the `SessionStart` hook fires.
+After reload, Claude Code exposes the plugin's `bin/` directory to tool calls. The first `deepline ...` command bootstraps the canonical CLI automatically.
 
 ## First use
 
@@ -40,11 +40,10 @@ After auth, invoke any skill, e.g. `/deepline:deepline-quickstart`.
 
 ## How it works
 
-- `bin/deepline` — POSIX shim. On first run, fetches `https://code.deepline.com/api/v2/cli/python` to `~/.local/share/deepline-plugin/cli/deepline.pyz` and execs it with `DEEPLINE_CONFIG_SCOPE=code-deepline-com` so auth state is shared with any existing standalone install.
-- `scripts/ensure-cli.sh` — `SessionStart` hook. Warms the shiv cache eagerly and prepends the plugin's `bin/` to `$PATH` via `$CLAUDE_ENV_FILE` so the shim wins over any older `~/.local/bin/deepline` from a previous standalone install.
+- `bin/deepline` — POSIX shim. On first run, invokes `https://code.deepline.com/api/v2/cli/install` with plugin-safe installer flags, then execs the canonical CLI at `~/.local/bin/deepline`.
 - `skills/` — vendored at publish time from the upstream skill source in [`deepline-api`](https://github.com/getaero-io/deepline-api).
 
-The Python shiv binary is **not** committed to this repo — it's fetched fresh per CLI release from `code.deepline.com`. Plugin version bumps invalidate the local cache so users automatically get the matching CLI.
+Plugin bootstrap skips shell profile edits, auth bootstrap, quickstart launch, and agent skill installation because Claude Code already loaded the plugin skills and owns plugin PATH wiring.
 
 ## License
 

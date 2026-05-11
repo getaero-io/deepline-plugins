@@ -5,9 +5,9 @@
 Initial public release.
 
 - Ships the Deepline GTM skill set (`deepline-gtm`, `deepline-quickstart`, `deepline-feedback`, plus recipe wrappers) under the `/deepline:*` namespace.
-- Self-healing CLI shim at `bin/deepline` — fetches the latest Deepline CLI Python shiv from `https://code.deepline.com/api/v2/cli/python` on first invocation, caches it at `~/.local/share/deepline-plugin/cli/deepline.pyz`, then `exec`s it with the same env wiring (`DEEPLINE_API_BASE_URL`, `DEEPLINE_CONFIG_SCOPE`, `DEEPLINE_INSTALL_METHOD`) as the standalone bash installer. Auth state is shared with the standalone CLI on machines that have both.
-- `SessionStart` hook (`scripts/ensure-cli.sh`) that warms the shiv cache eagerly and prepends the plugin's `bin/` to `$PATH` via `$CLAUDE_ENV_FILE` so the plugin shim wins over any pre-existing standalone install inside Claude Code's Bash tool.
-- Optional cross-session auth persistence in cloud sandboxes: the shim sources `${CLAUDE_PROJECT_DIR}/.deepline/.env` if present, so users with a connected workspace can persist `DEEPLINE_API_KEY` across Cowork sandbox teardowns.
+- Self-healing CLI shim at `bin/deepline` — invokes the canonical Deepline installer from `https://code.deepline.com/api/v2/cli/install` on first invocation, then delegates to the installed CLI at `~/.local/bin/deepline`.
+- Plugin bootstrap skips shell profile edits, quickstart launch, auth bootstrap, and duplicate agent skill installation because Claude Code owns plugin PATH wiring and already loaded the shipped skills.
+- Optional cross-session auth persistence in Cowork-style cloud sandboxes: the shim reads `${CLAUDE_PROJECT_DIR}/.deepline/.env` or the discovered workspace `.deepline/.env` as data, never as shell, so users with a connected workspace can persist `DEEPLINE_API_KEY` across sandbox teardowns.
 
 ### Companion CLI changes (deepline-api)
 
