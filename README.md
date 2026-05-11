@@ -18,11 +18,16 @@ In Cowork, add Deepline as a personal plugin:
    ```
 
 5. Install the `deepline` plugin.
+
+![Deepline installed in Cowork plugins](assets/cowork-plugin-directory.png)
+
 6. Start a Cowork session and run:
 
    ```text
    /deepline:deepline-quickstart
    ```
+
+![Deepline quickstart running in Cowork](assets/cowork-quickstart.png)
 
 The first Deepline command may install the canonical Deepline CLI inside the Cowork sandbox. That is expected.
 
