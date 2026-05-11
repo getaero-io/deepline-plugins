@@ -1,49 +1,176 @@
-# Deepline Plugin for Claude Code
+# Deepline Plugin
 
-Deepline GTM skills + CLI for [Claude Code](https://code.claude.com), distributed as a single plugin. Works in local Claude Code on your laptop and in Cowork (cloud sandboxes).
+Deepline adds GTM skills and the `deepline` CLI to Claude Cowork and Claude Code.
 
-## What you get
+Use it to build prospect lists, enrich CSVs, research accounts, write outbound, and run Deepline workflows from the same Claude session where you are working.
 
-- **Skills** under the `/deepline:*` namespace — `deepline-gtm`, `deepline-quickstart`, `deepline-feedback`, plus recipe wrappers (`build-tam`, `portfolio-prospecting`, `linkedin-url-lookup`, etc.)
-- **CLI** auto-installed on first invocation. The plugin's shim runs the standard Deepline installer from `code.deepline.com`, then delegates to the installed CLI — no separate install step.
-- **Auth** handled via the standard browser-approval flow. Existing standalone-CLI auth state on your laptop is reused automatically; Cowork sandboxes complete a one-click claim per session.
+## What You Get
 
-## Install
+- Deepline skills under the `/deepline:*` namespace, including `/deepline:deepline-gtm`, `/deepline:deepline-quickstart`, and `/deepline:deepline-feedback`.
+- A `deepline` command on Claude's tool `PATH`.
+- Automatic CLI bootstrap on first use. The plugin shim runs the standard Deepline installer from `https://code.deepline.com/api/v2/cli/install`, then delegates to the installed CLI.
+- Shared auth behavior across environments. Local Claude Code can reuse your existing Deepline CLI auth; Cowork can restore auth from the workspace `.deepline/.env` file or guide you through browser approval.
 
+## Install In Claude Cowork
+
+Cowork installs plugins through the Claude Desktop app. This is the recommended path if you use Cowork cloud sandboxes.
+
+1. Download a Deepline plugin ZIP. Use a release asset if one was shared with you, or create one from this repository.
+2. Open Claude Desktop and switch to **Cowork**.
+3. Open **Customize** in the left sidebar.
+4. Choose **Browse plugins**.
+5. Upload the Deepline plugin ZIP as a custom plugin.
+6. Start a new Cowork task and type `/` to confirm the Deepline skills appear.
+
+After install, ask Cowork to run:
+
+```bash
+command -v deepline
+deepline --version
+deepline auth status
 ```
+
+The first `deepline` command may install the canonical CLI into the sandbox. That is expected.
+
+### Creating A ZIP From This Repository
+
+If you are testing from a local checkout, create the upload ZIP from the repository root:
+
+```bash
+zip -qr ../deepline-plugin.zip . -x '.git/*'
+```
+
+The ZIP must contain `.claude-plugin/plugin.json`, `bin/deepline`, and `skills/` at the archive root. Do not zip a parent folder that contains the plugin folder; Cowork expects the plugin files themselves at the top level of the archive.
+
+## Install In Claude Code
+
+Claude Code installs this plugin from the GitHub marketplace in this repository.
+
+Inside Claude Code, run:
+
+```text
 /plugin marketplace add getaero-io/deepline-plugins
 /plugin install deepline@deepline
 /reload-plugins
 ```
 
-After reload, Claude Code exposes the plugin's `bin/` directory to tool calls. The first `deepline ...` command bootstraps the canonical CLI automatically.
+Then verify:
 
-## First use
-
-### On your laptop
-
+```bash
+command -v deepline
+deepline --version
+deepline auth status
 ```
+
+If you installed from a local checkout while developing, use Claude Code's local path support instead:
+
+```text
+/plugin marketplace add /absolute/path/to/deepline-plugins/.claude-plugin/marketplace.json
+/plugin install deepline@deepline
+/reload-plugins
+```
+
+## Authenticate
+
+### Claude Code On Your Laptop
+
+If you already use the standalone Deepline CLI, the plugin should reuse that auth state.
+
+If you need to log in:
+
+```bash
 deepline auth register
 ```
 
-Opens your browser, you approve, the CLI persists your API key. Subsequent skills and `deepline ...` commands just work.
+Approve the browser page that opens, then run:
 
-### In Cowork (or any cloud sandbox)
-
-```
-deepline auth register --no-wait     # prints the claim URL
-# Click the URL in your browser, approve.
-deepline auth wait                    # auto-detects approval, persists key
+```bash
+deepline auth status
 ```
 
-After auth, invoke any skill, e.g. `/deepline:deepline-quickstart`.
+### Cowork
 
-## How it works
+Cowork runs commands in a cloud sandbox, so browser auth is a two-step flow:
 
-- `bin/deepline` — POSIX shim. On first run, invokes `https://code.deepline.com/api/v2/cli/install` with plugin-safe installer flags, then execs the canonical CLI at `~/.local/bin/deepline`.
-- `skills/` — vendored at publish time from the upstream skill source in [`deepline-api`](https://github.com/getaero-io/deepline-api).
+```bash
+deepline auth register --no-wait
+```
 
-Plugin bootstrap skips shell profile edits, auth bootstrap, quickstart launch, and agent skill installation because Claude Code already loaded the plugin skills and owns plugin PATH wiring.
+Open the printed approval URL in your browser, approve it, then run:
+
+```bash
+deepline auth wait --timeout 120
+deepline auth status
+```
+
+If the workspace already has `.deepline/.env` with `DEEPLINE_API_KEY`, the plugin shim reads it before invoking the CLI. When Cowork completes auth successfully, the CLI writes the current key back to that workspace file so later sandbox commands can reuse it.
+
+## Try It
+
+Run the quickstart skill:
+
+```text
+/deepline:deepline-quickstart
+```
+
+Or test the CLI directly:
+
+```bash
+deepline tools execute run_javascript \
+  --payload '{"code":"return {ok:true,message:\"deepline works\",value:42};"}' \
+  --json
+```
+
+For CSV enrichment, ask Claude to use `/deepline:deepline-gtm` with a CSV path and the fields you want filled.
+
+## How It Works
+
+- `bin/deepline` is a small POSIX shim. Claude Code and Cowork add plugin `bin/` directories to tool `PATH`, so `deepline ...` works before the real CLI is installed.
+- On first invocation, the shim runs the canonical Deepline installer.
+- The installer skips duplicate agent-skill installation while running from the plugin, because the plugin already provides skills.
+- `skills/` is vendored from Deepline's upstream skill sources.
+
+## Troubleshooting
+
+### `deepline: installing CLI...`
+
+Expected on first use in a fresh environment. Re-run your original command after install if Claude stopped early.
+
+### `deepline: failed to install CLI`
+
+Check network access from the environment:
+
+```bash
+curl -I https://code.deepline.com/api/v2/cli/install
+```
+
+If you are testing a development backend, make sure the plugin ZIP was built with the correct public tunnel URL.
+
+### Skills Do Not Appear
+
+In Claude Code, run:
+
+```text
+/reload-plugins
+```
+
+In Cowork, start a new task after installing the plugin and type `/` to open the skill picker.
+
+### Auth Error
+
+Run:
+
+```bash
+deepline auth status
+```
+
+If the key is stale, run the auth flow again. In Cowork, prefer `deepline auth register --no-wait` followed by `deepline auth wait --timeout 120`.
+
+## References
+
+- [Claude Code plugin docs](https://code.claude.com/docs/en/discover-plugins)
+- [Create plugins for Claude Code](https://code.claude.com/docs/en/plugins)
+- [Use plugins in Claude Cowork](https://support.claude.com/en/articles/13837440-use-plugins-in-claude-cowork)
 
 ## License
 
