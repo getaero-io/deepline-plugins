@@ -1,6 +1,6 @@
 {
-  "version": "3957838fbf10ae254a0f6f01e38855f143f683e05ef7fc3d119f1b49b5d494d5",
-  "generated_at": "2026-05-12T20:02:53.052Z",
+  "version": "35ccc91569f1160179e6c392c5c3a56e1d189d015ff4b219f1c1668338fc842a",
+  "generated_at": "2026-05-13T01:55:22.770Z",
   "base_url": "https://code.deepline.com",
   "skills": [
     {
@@ -843,8 +843,8 @@
           ]
         },
         {
-          "path": "shared/play-anatomy.md",
-          "url": "https://code.deepline.com/.well-known/skills/deepline-sdk/shared/play-anatomy.md",
+          "path": "shared/plays-best-practices.md",
+          "url": "https://code.deepline.com/.well-known/skills/deepline-sdk/shared/plays-best-practices.md",
           "kind": "guide",
           "title": "Shared Guide",
           "providers": [],
@@ -872,7 +872,7 @@
         "jobs/finding-companies-and-contacts.md",
         "jobs/writing-outreach.md",
         "references/debugging.md",
-        "shared/play-anatomy.md",
+        "shared/plays-best-practices.md",
         "skill-metadata.json",
         "SKILL.md"
       ]
