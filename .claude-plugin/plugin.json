@@ -1,6 +1,6 @@
 {
   "name": "deepline",
-  "version": "1.1.52",
+  "version": "1.1.53",
   "description": "Deepline GTM skills and CLI for Claude Code (laptop and Cowork sandboxes).",
   "author": {
     "name": "Deepline"
