@@ -10,19 +10,23 @@ In Cowork, add Deepline as a personal plugin:
 
 1. Open Claude Desktop and switch to **Cowork**.
 2. Open **Customize** in the left sidebar.
-3. Choose **Browse plugins**.
-4. Add a personal/custom plugin from this GitHub repository:
+3. Click the **+** next to **Personal plugins**.
+4. Open **Create plugin**, then choose **Add marketplace**.
+
+![Find Add marketplace in Cowork plugins](assets/cowork-add-marketplace.png)
+
+5. Add a personal/custom plugin from this GitHub repository:
 
    ```text
    https://github.com/getaero-io/deepline-plugins
    ```
 
-5. Install the `deepline` plugin.
-6. Enable internet access for **all domains** in the Cowork session settings.
+6. Install the `deepline` plugin.
 
 ![Deepline installed in Cowork plugins](assets/cowork-plugin-directory.png)
 
-7. Start a Cowork session and run:
+7. Enable internet access for **all domains** in the Cowork session settings.
+8. Start a Cowork session and run:
 
    ```text
    /deepline-quickstart
