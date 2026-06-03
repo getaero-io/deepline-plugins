@@ -26,9 +26,11 @@ In Cowork, add Deepline as a personal plugin:
 ![Deepline installed in Cowork plugins](assets/cowork-plugin-directory.png)
 
 7. Enable internet access for **all domains** in the Cowork session settings.
-8. Start a Cowork session, select a project folder, then run:
+8. Start a Cowork session and select a project folder.
 
 ![Select a project folder when starting a Cowork session](assets/cowork-select-project-folder.png)
+
+9. Run:
 
    ```text
    /deepline-quickstart
