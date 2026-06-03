@@ -26,7 +26,7 @@ In Cowork, add Deepline as a personal plugin:
 ![Deepline installed in Cowork plugins](assets/cowork-plugin-directory.png)
 
 7. Enable internet access for **all domains** in the Cowork session settings.
-8. Start a Cowork session and run:
+8. Start a Cowork session, select a project folder, then run:
 
    ```text
    /deepline-quickstart
@@ -35,6 +35,7 @@ In Cowork, add Deepline as a personal plugin:
 ![Deepline quickstart running in Cowork](assets/cowork-quickstart.png)
 
 The first Deepline command may install the canonical Deepline CLI inside the Cowork sandbox. That is expected.
+Selecting a folder lets Deepline persist auth in that workspace, so future Cowork sessions opened on the same folder can reuse the login.
 
 ## Install In Claude Code
 
