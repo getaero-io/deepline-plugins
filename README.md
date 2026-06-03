@@ -42,6 +42,8 @@ Selecting a folder lets Deepline persist auth in that workspace, so future Cowor
 
 The first Deepline command may install the canonical Deepline CLI inside the Cowork sandbox. That is expected.
 
+Team and Enterprise plans: your organization owner may need to enable Cowork for the workspace. They may also need to allow internet access for all domains, or add the domains you use, in Cowork's network settings. See [Use Claude Cowork on Team and Enterprise plans](https://support.claude.com/en/articles/13455879-use-claude-cowork-on-team-and-enterprise-plans).
+
 ## Install In Claude Code
 
 Inside Claude Code, run:
