@@ -30,6 +30,8 @@ In Cowork, add Deepline as a personal plugin:
 
 ![Select a project folder when starting a Cowork session](assets/cowork-select-project-folder.png)
 
+Selecting a folder lets Deepline persist auth in that workspace, so future Cowork sessions opened on the same folder can reuse the login.
+
 9. Run:
 
    ```text
@@ -39,7 +41,6 @@ In Cowork, add Deepline as a personal plugin:
 ![Deepline quickstart running in Cowork](assets/cowork-quickstart.png)
 
 The first Deepline command may install the canonical Deepline CLI inside the Cowork sandbox. That is expected.
-Selecting a folder lets Deepline persist auth in that workspace, so future Cowork sessions opened on the same folder can reuse the login.
 
 ## Install In Claude Code
 
