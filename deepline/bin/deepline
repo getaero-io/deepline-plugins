@@ -7,6 +7,8 @@ set -e
 INSTALL_URL="${DEEPLINE_CLI_INSTALL_URL:-https://code.deepline.com/api/v2/cli/install}"
 INSTALL_DIR="${DEEPLINE_INSTALL_DIR:-$HOME/.local/bin}"
 REAL="$INSTALL_DIR/deepline"
+CLI_FAMILY="${DEEPLINE_PLUGIN_CLI_FAMILY:-legacy}"
+CLI_FAMILY_MARKER="$INSTALL_DIR/.deepline-plugin-family"
 PLUGIN_BIN_DIR="$(CDPATH= cd -- "$(dirname -- "$0")" 2>/dev/null && pwd -P)"
 PLUGIN_ROOT="$(CDPATH= cd -- "$PLUGIN_BIN_DIR/.." 2>/dev/null && pwd -P)"
 
@@ -91,6 +93,8 @@ install_canonical_cli() {
     DEEPLINE_INSTALLER_SKIP_AGENT_SKILL_INSTALL=true \
     DEEPLINE_INSTALL_DIR="$INSTALL_DIR" \
     sh; then
+    mkdir -p "$INSTALL_DIR"
+    printf '%s\n' "$CLI_FAMILY" > "$CLI_FAMILY_MARKER"
     return 0
   fi
 
@@ -100,7 +104,14 @@ install_canonical_cli() {
 
 export_workspace_api_key
 
-if [ ! -x "$REAL" ]; then
+installed_family=""
+if [ -f "$CLI_FAMILY_MARKER" ]; then
+  installed_family="$(sed -n '1p' "$CLI_FAMILY_MARKER" 2>/dev/null || true)"
+elif [ "$CLI_FAMILY" = "legacy" ] && [ -x "$REAL" ]; then
+  installed_family="legacy"
+fi
+
+if [ ! -x "$REAL" ] || [ "$installed_family" != "$CLI_FAMILY" ]; then
   install_canonical_cli
 fi
 
