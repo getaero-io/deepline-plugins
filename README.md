@@ -22,13 +22,15 @@ In Cowork, add Deepline as a personal plugin:
    ```
 
 6. Install one of the Deepline plugins:
-
    - `deepline` for the current GTM skills and legacy CLI
    - `deepline-plays` for V2 Plays and GTM workflows as code
 
 ![Deepline installed in Cowork plugins](assets/cowork-plugin-directory.png)
 
-7. Enable internet access for **all domains** in the Cowork session settings.
+7. Enable internet access for **all domains** in the Cowork session settings: open **Settings** -> **Capabilities**, turn on **Allow network egress**, then set **Domain allowlist** to **All domains**.
+
+![Cowork network egress set to all domains](assets/cowork-network-egress.png)
+
 8. Start a Cowork session and select a project folder.
 
 ![Select a project folder when starting a Cowork session](assets/cowork-select-project-folder.png)
