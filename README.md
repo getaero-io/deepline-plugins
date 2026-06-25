@@ -21,9 +21,7 @@ In Cowork, add Deepline as a personal plugin:
    https://github.com/getaero-io/deepline-plugins
    ```
 
-6. Install one of the Deepline plugins:
-   - `deepline` for the current GTM skills and legacy CLI
-   - `deepline-plays` for V2 Plays and GTM workflows as code
+6. Install the `deepline` plugin.
 
 ![Deepline installed in Cowork plugins](assets/cowork-plugin-directory.png)
 
@@ -56,14 +54,6 @@ Inside Claude Code, run:
 ```text
 /plugin marketplace add getaero-io/deepline-plugins
 /plugin install deepline@deepline
-/reload-plugins
-```
-
-For V2 Plays:
-
-```text
-/plugin marketplace add getaero-io/deepline-plugins
-/plugin install deepline-plays@deepline
 /reload-plugins
 ```
 

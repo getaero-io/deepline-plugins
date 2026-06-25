@@ -8,7 +8,7 @@
     {
       "name": "deepline",
       "description": "Deepline GTM skills and CLI for Claude Code (laptop and Cowork sandboxes).",
-      "version": "1.1.198",
+      "version": "1.1.199",
       "source": "./deepline",
       "category": "productivity",
       "keywords": [
@@ -17,21 +17,6 @@
         "enrichment",
         "deepline",
         "sales"
-      ]
-    },
-    {
-      "name": "deepline-plays",
-      "description": "Deepline Plays: GTM workflows as code for Claude Code and Cowork sandboxes.",
-      "version": "1.1.198",
-      "source": "./deepline-plays",
-      "category": "productivity",
-      "keywords": [
-        "gtm",
-        "outbound",
-        "enrichment",
-        "deepline",
-        "plays",
-        "workflows"
       ]
     }
   ]
