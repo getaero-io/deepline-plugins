@@ -18,6 +18,67 @@ if [ -d "$PLUGIN_ROOT/skills" ]; then
   export DEEPLINE_PLUGIN_SKILLS_DIR="${DEEPLINE_PLUGIN_SKILLS_DIR:-$PLUGIN_ROOT/skills}"
 fi
 
+resolve_workspace_dir() {
+  if [ -n "${CLAUDE_PROJECT_DIR:-}" ] && [ -d "$CLAUDE_PROJECT_DIR" ]; then
+    printf '%s\n' "$CLAUDE_PROJECT_DIR"
+    return 0
+  fi
+
+  case "${HOME:-}" in
+    /sessions/*) ;;
+    *)
+      case "${CLAUDE_CODE_REMOTE:-}" in
+        1|true|TRUE|yes|YES|on|ON) ;;
+        *) return 0 ;;
+      esac
+      ;;
+  esac
+
+  if [ ! -d "$HOME/mnt" ]; then
+    return 0
+  fi
+
+  if [ -d "$HOME/mnt/deepline" ]; then
+    printf '%s\n' "$HOME/mnt/deepline"
+    return 0
+  fi
+
+  for candidate in "$HOME"/mnt/*/; do
+    [ -d "$candidate" ] || continue
+    basename="${candidate%/}"
+    basename="${basename##*/}"
+    case "$basename" in
+      .*|outputs|uploads) continue ;;
+    esac
+    printf '%s\n' "${candidate%/}"
+    return 0
+  done
+}
+
+export_workspace_api_key() {
+  workspace_dir="$(resolve_workspace_dir)"
+  if [ -z "$workspace_dir" ]; then
+    return 0
+  fi
+
+  workspace_env="$workspace_dir/.deepline/.env"
+  if [ ! -f "$workspace_env" ]; then
+    return 0
+  fi
+
+  # Parse as data, never source. The workspace is user/repo-controlled.
+  while IFS='=' read -r key value; do
+    case "$key" in
+      DEEPLINE_API_KEY)
+        value="${value%\"}"; value="${value#\"}"
+        value="${value%\'}"; value="${value#\'}"
+        export DEEPLINE_API_KEY="$value"
+        return 0
+        ;;
+    esac
+  done < "$workspace_env"
+}
+
 install_canonical_cli() {
   if [ "$0" = "$REAL" ]; then
     echo "deepline: refusing to bootstrap recursively from $REAL" >&2
@@ -40,6 +101,8 @@ install_canonical_cli() {
   echo "deepline: failed to install CLI from $INSTALL_URL" >&2
   exit 127
 }
+
+export_workspace_api_key
 
 installed_family=""
 if [ -f "$CLI_FAMILY_MARKER" ]; then
