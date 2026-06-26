@@ -7,7 +7,7 @@ Initial public release.
 - Ships the Deepline GTM skill set (`deepline-gtm`, `deepline-quickstart`, `deepline-feedback`, plus recipe wrappers) under the `/deepline:*` namespace.
 - Self-healing CLI shim at `bin/deepline` — invokes the canonical Deepline installer from `https://code.deepline.com/api/v2/cli/install` on first invocation, then delegates to the installed CLI at `~/.local/bin/deepline`.
 - Plugin bootstrap skips shell profile edits, quickstart launch, auth bootstrap, and duplicate agent skill installation because Claude Code owns plugin PATH wiring and already loaded the shipped skills.
-- Optional cross-session auth persistence in Cowork-style cloud sandboxes: the shim reads `${CLAUDE_PROJECT_DIR}/.deepline/.env` or the discovered workspace `.deepline/.env` as data, never as shell, so users with a connected workspace can persist `DEEPLINE_API_KEY` across sandbox teardowns.
+- Plugin bootstrap delegates auth persistence to the SDK CLI. Project/org auth lives in `.env.deepline`; in Cowork-style cloud sandboxes, `deepline org set <org>` uses auth-scope `auto` to write that file to the mounted project folder when one is detected.
 
 ### Companion CLI changes (deepline-api)
 
