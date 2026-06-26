@@ -292,6 +292,7 @@ These entries come from `COMPATIBLE_SDK_API_CHANGES` and explain additive change
 
 | Change | Reason |
 |---|---|
+| `2026-06-play-run-runtime-deploy-version-routing` | Threads an internal runtimeDeployVersion through POST /api/v2/plays/run start and immediate wait-for-completion handling so same-run coordinator calls can stay pinned to the Cloudflare Worker version that accepted the run while newer run... |
 | `2026-06-sdk-enrich-name-domain-waterfall-runtime` | Fixes SDK CLI `deepline enrich` generated play source so inline prebuilt play calls with an entirely blank templated payload are skipped before starting a child run, and shortens the V2 prebuilt name-and-domain-to-email-waterfall-batch r... |
 | `2026-06-sdk-enrich-inline-child-email-fallback` | Fixes SDK CLI `deepline enrich` generated play source so inline prebuilt child plays such as person-linkedin-to-email execute through the V2 child-run path without treating internal parentRunId/rootRunId metadata as public play input, an... |
 | `2026-06-billing-run-provider-audit-fields` | Adds customer-safe run-level billing auditability to existing billing usage and ledger surfaces: GET /api/v2/billing/usage recent activity and GET /api/v2/billing/ledger entries/CSV now include additive Deepline-priced provider/action/ru... |
@@ -299,7 +300,6 @@ These entries come from `COMPATIBLE_SDK_API_CHANGES` and explain additive change
 | `2026-06-sdk-enrich-run-if-condition-stats` | Fixes SDK CLI `deepline enrich` generated play source so direct `--with` and waterfall child `run_if_js` predicates are emitted as native dataset-column runIf gates, which makes V2 run summaries report skipped:condition while preserving... |
 | `2026-06-sdk-enrich-in-place-export-safety` | Hardens SDK CLI `deepline enrich` CSV export so `--in-place --all` overlays run output onto the original source CSV, refuses partial in-place writes that would shrink the local file, and keeps provider/failure result envelopes compact in... |
 | `2026-06-play-run-query-access-sql-metadata` | Adds optional sqlTableName and sqlQualifiedTableName metadata to play-run dataset packages and deepline_db_query follow-up actions so SDK/CLI/API consumers can display the exact server-returned customer storage table without deriving nam... |
-| `2026-06-deepline-plays-recipe-skill-surface` | Consolidates Deepline plays agent docs into the v1 well-known skill bundle by publishing /deepline-plays as a recipe-wrapper skill, removing legacy deepline-plays-feedback/deepline-plays-quickstart cleanup targets, and updating SDK skill... |
 
 ## Public Types
 
