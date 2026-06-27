@@ -18,6 +18,169 @@ if [ -d "$PLUGIN_ROOT/skills" ]; then
   export DEEPLINE_PLUGIN_SKILLS_DIR="${DEEPLINE_PLUGIN_SKILLS_DIR:-$PLUGIN_ROOT/skills}"
 fi
 
+is_remote_workspace_session() {
+  case "${HOME:-}" in
+    /sessions/*) return 0 ;;
+    *)
+      case "${CLAUDE_CODE_REMOTE:-}" in
+        1|true|TRUE|yes|YES|on|ON) return 0 ;;
+      esac
+      ;;
+  esac
+
+  return 1
+}
+
+find_mounted_root_from_path() {
+  start_path="$1"
+  if [ -z "$start_path" ] || [ ! -d "$start_path" ]; then
+    return 1
+  fi
+
+  current="$(CDPATH= cd -- "$start_path" 2>/dev/null && pwd -P)"
+  while [ -n "$current" ] && [ "$current" != "/" ]; do
+    if [ -d "$current/mnt" ]; then
+      printf '%s\n' "$current/mnt"
+      return 0
+    fi
+    parent="${current%/*}"
+    if [ -z "$parent" ] || [ "$parent" = "$current" ]; then
+      return 1
+    fi
+    current="$parent"
+  done
+  return 1
+}
+
+resolve_mounted_root() {
+  mounted_root="$(find_mounted_root_from_path "${HOME:-}" || true)"
+  if [ -n "$mounted_root" ]; then
+    printf '%s\n' "$mounted_root"
+    return 0
+  fi
+
+  current_dir="$(pwd -P 2>/dev/null || pwd)"
+  mounted_root="$(find_mounted_root_from_path "$current_dir" || true)"
+  if [ -n "$mounted_root" ]; then
+    printf '%s\n' "$mounted_root"
+    return 0
+  fi
+}
+
+resolve_workspace_dir() {
+  if ! is_remote_workspace_session; then
+    return 0
+  fi
+
+  if [ -n "${CLAUDE_PROJECT_DIR:-}" ] && [ -d "$CLAUDE_PROJECT_DIR" ]; then
+    printf '%s\n' "$CLAUDE_PROJECT_DIR"
+    return 0
+  fi
+
+  mounted_root="$(resolve_mounted_root)"
+  if [ -z "$mounted_root" ] || [ ! -d "$mounted_root" ]; then
+    return 0
+  fi
+
+  current_dir="$(pwd -P 2>/dev/null || pwd)"
+  current_candidate=""
+  current_count=0
+  resolved_candidate=""
+  resolved_count=0
+  for candidate in "$mounted_root"/*/; do
+    [ -d "$candidate" ] || continue
+    basename="${candidate%/}"
+    basename="${basename##*/}"
+    case "$basename" in
+      .*|outputs|plugins|uploads) continue ;;
+    esac
+    if [ ! -f "${candidate%/}/.deepline/.env" ]; then
+      continue
+    fi
+    candidate_dir="$(CDPATH= cd -- "${candidate%/}" 2>/dev/null && pwd -P)"
+    case "$current_dir/" in
+      "$candidate_dir"/*)
+        current_candidate="$candidate_dir"
+        current_count=$((current_count + 1))
+        ;;
+    esac
+    resolved_candidate="$candidate_dir"
+    resolved_count=$((resolved_count + 1))
+  done
+
+  if [ "$current_count" -eq 1 ]; then
+    printf '%s\n' "$current_candidate"
+    return 0
+  fi
+
+  if [ "$resolved_count" -eq 1 ]; then
+    printf '%s\n' "$resolved_candidate"
+    return 0
+  fi
+}
+
+is_tracked_workspace_env() {
+  workspace_dir="$1"
+  if ! command -v git >/dev/null 2>&1; then
+    return 1
+  fi
+  if ! git -C "$workspace_dir" rev-parse --is-inside-work-tree >/dev/null 2>&1; then
+    return 1
+  fi
+  git -C "$workspace_dir" ls-files --error-unmatch -- .deepline/.env >/dev/null 2>&1
+}
+
+export_workspace_auth() {
+  if [ -n "${DEEPLINE_API_KEY:-}" ]; then
+    return 0
+  fi
+
+  workspace_dir="$(resolve_workspace_dir)"
+  if [ -z "$workspace_dir" ]; then
+    return 0
+  fi
+
+  workspace_env="$workspace_dir/.deepline/.env"
+  if [ ! -f "$workspace_env" ]; then
+    return 0
+  fi
+  if is_tracked_workspace_env "$workspace_dir"; then
+    return 0
+  fi
+
+  # Parse as data, never source. Only untracked CLI-created restore files are trusted.
+  restored_api_key=""
+  restored_host_url=""
+  while IFS= read -r line || [ -n "$line" ]; do
+    case "$line" in
+      DEEPLINE_API_KEY=*)
+        value="${line#DEEPLINE_API_KEY=}"
+        value="${value%\"}"; value="${value#\"}"
+        value="${value%\'}"; value="${value#\'}"
+        restored_api_key="$value"
+        ;;
+      DEEPLINE_HOST_URL=*)
+        value="${line#DEEPLINE_HOST_URL=}"
+        value="${value%\"}"; value="${value#\"}"
+        value="${value%\'}"; value="${value#\'}"
+        restored_host_url="$value"
+        ;;
+    esac
+  done < "$workspace_env"
+
+  if [ -n "$restored_api_key" ]; then
+    if [ -n "${DEEPLINE_HOST_URL:-}" ]; then
+      if [ -z "$restored_host_url" ] || [ "$DEEPLINE_HOST_URL" != "$restored_host_url" ]; then
+        return 0
+      fi
+    fi
+    export DEEPLINE_API_KEY="$restored_api_key"
+    if [ -z "${DEEPLINE_HOST_URL:-}" ] && [ -n "$restored_host_url" ]; then
+      export DEEPLINE_HOST_URL="$restored_host_url"
+    fi
+  fi
+}
+
 install_canonical_cli() {
   if [ "$0" = "$REAL" ]; then
     echo "deepline: refusing to bootstrap recursively from $REAL" >&2
@@ -40,6 +203,8 @@ install_canonical_cli() {
   echo "deepline: failed to install CLI from $INSTALL_URL" >&2
   exit 127
 }
+
+export_workspace_auth
 
 installed_family=""
 if [ -f "$CLI_FAMILY_MARKER" ]; then
