@@ -1,5 +1,10 @@
 # Changelog
 
+## Unreleased
+
+- Plugin packaging is now skills-only. Each shipped `SKILL.md` includes the npm CLI install, auth, and skill refresh commands.
+- Removed the plugin `bin/deepline` bootstrap shim from the assembled Cowork/Claude Code plugin artifact.
+
 ## 1.0.0 — 2026-05-04
 
 Initial public release.

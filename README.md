@@ -1,6 +1,6 @@
-# Deepline Plugin
+# Deepline Skills Plugin
 
-Deepline adds GTM skills and the `deepline` CLI to Claude Cowork and Claude Code.
+Deepline adds GTM skills to Claude Cowork and Claude Code. Each installed skill includes the Deepline CLI setup commands, so the plugin is only a skills bundle.
 
 Use it to build prospect lists, enrich CSVs, research accounts, write outbound, and run Deepline workflows from Claude.
 
@@ -33,7 +33,7 @@ In Cowork, add Deepline as a personal plugin:
 
 ![Select a project folder when starting a Cowork session](assets/cowork-select-project-folder.png)
 
-Selecting a folder lets Deepline persist auth in that workspace, so future Cowork sessions opened on the same folder can reuse the login.
+Selecting a folder lets Deepline persist auth in that workspace, so future Cowork sessions opened on the same folder can reuse the saved auth.
 
 9. Run:
 
@@ -43,7 +43,16 @@ Selecting a folder lets Deepline persist auth in that workspace, so future Cowor
 
 ![Deepline quickstart running in Cowork](assets/cowork-quickstart.png)
 
-The first Deepline command may install the canonical Deepline CLI inside the Cowork sandbox. That is expected.
+If the CLI is not installed yet, the skill will tell Claude to run:
+
+```bash
+npm install -g deepline
+# Fallback for secure sandboxes: mkdir -p "$HOME/.local" && npm config set prefix "$HOME/.local" && export PATH="$HOME/.local/bin:$PATH" && npm install -g deepline --registry https://code.deepline.com/api/v2/npm/
+deepline auth register --wait auto
+deepline auth wait --timeout 120 # completes Cowork/browser approval; no-op if already connected
+deepline auth status
+deepline -h
+```
 
 Team and Enterprise plans: your organization owner may need to enable Cowork for the workspace. They may also need to allow internet access for all domains, or add the domains you use, in Cowork's network settings. See [Use Claude Cowork on Team and Enterprise plans](https://support.claude.com/en/articles/13455879-use-claude-cowork-on-team-and-enterprise-plans).
 
@@ -63,20 +72,30 @@ Then try:
 /deepline-quickstart
 ```
 
+If the CLI is not installed yet, the skill will tell Claude to run:
+
+```bash
+npm install -g deepline
+# Fallback for secure sandboxes: mkdir -p "$HOME/.local" && npm config set prefix "$HOME/.local" && export PATH="$HOME/.local/bin:$PATH" && npm install -g deepline --registry https://code.deepline.com/api/v2/npm/
+deepline auth register --wait auto
+deepline auth wait --timeout 120 # completes Cowork/browser approval; no-op if already connected
+deepline auth status
+deepline -h
+```
+
 ## Auth
 
 If Deepline asks you to authenticate:
 
 ```bash
-deepline auth register --no-wait
-```
-
-Open the printed approval URL, approve it, then run:
-
-```bash
-deepline auth wait --timeout 120
+deepline auth register --wait auto
+deepline auth wait --timeout 120 # completes Cowork/browser approval; no-op if already connected
 deepline auth status
+deepline -h
 ```
+
+`--wait auto` waits locally and returns after printing the approval link in
+Cowork. `auth wait` is safe in both places.
 
 ## Verify
 

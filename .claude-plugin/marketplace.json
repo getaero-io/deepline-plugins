@@ -7,8 +7,8 @@
   "plugins": [
     {
       "name": "deepline",
-      "description": "Deepline GTM skills and CLI for Claude Code (laptop and Cowork sandboxes).",
-      "version": "1.1.234",
+      "description": "Deepline GTM skills for Claude Code and Cowork. Each skill includes npm CLI install and auth setup.",
+      "version": "1.1.235",
       "source": "./deepline",
       "category": "productivity",
       "keywords": [
