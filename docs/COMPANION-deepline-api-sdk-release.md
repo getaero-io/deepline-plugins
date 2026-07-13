@@ -22,11 +22,23 @@ version"** and **before "Create GitHub release"**:
         run: |
           set -euo pipefail
           mkdir -p ../dist-bin
-          for tgt in darwin-arm64 darwin-x64 linux-arm64 linux-x64; do
+          # target -> bun compile target. x64 uses the *baseline* target on
+          # purpose: bun's default bun-linux-x64 / bun-darwin-x64 binaries
+          # require AVX CPU instructions and abort with
+          # "CPU lacks AVX support ... use *-baseline build" on hosts without
+          # them (older/budget cloud VMs, some shared tiers, emulated x64).
+          # Verified in a clean container: the default x64 binary aborts on a
+          # no-AVX CPU; the -baseline binary runs. arm64 has no such split.
+          # The asset name stays deepline-<os>-x64 so the launcher is unchanged.
+          compile() { # <asset-suffix> <bun-target>
             bun build ./dist/cli/index.mjs \
-              --compile --target="bun-${tgt}" \
-              --outfile "../dist-bin/deepline-${tgt}"
-          done
+              --compile --target="$2" \
+              --outfile "../dist-bin/deepline-$1"
+          }
+          compile darwin-arm64 bun-darwin-arm64
+          compile darwin-x64   bun-darwin-x64-baseline
+          compile linux-arm64  bun-linux-arm64
+          compile linux-x64    bun-linux-x64-baseline
           cd ../dist-bin
           # Clay-format checksums: "<sha256>  <asset>"
           sha256sum deepline-* > checksums.txt
@@ -49,9 +61,42 @@ the `gh release create` call:
 
 `bun build --compile --target=bun-<os>-<arch>` cross-compiles from a single
 ubuntu runner (bun downloads the target runtime), so no build matrix is needed.
-Verified locally against `sdk/dist/cli/index.mjs`: all four targets compile
-(62–92 MB each) and the darwin-arm64 binary runs `--version` / `--help` with no
-Node anywhere on `PATH`.
+
+### Add a smoke-run gate (recommended)
+
+Compiling is not the same as running — the AVX issue above only surfaces at
+*execution* time. Add a step after compile that actually runs the two Linux
+binaries in clean, Node-free containers before the release is created, so a
+broken binary fails the release instead of shipping:
+
+```yaml
+      - name: Smoke-run Linux binaries (no Node, glibc)
+        if: steps.decide.outputs.should_publish == 'true'
+        run: |
+          set -euo pipefail
+          run_one() { # <platform> <asset>
+            docker run --rm --platform "$1" \
+              -v "$PWD/dist-bin/$2:/deepline:ro" debian:12-slim \
+              sh -c 'command -v node >/dev/null && { echo "node leaked in"; exit 1; }; /deepline --version'
+          }
+          run_one linux/amd64 deepline-linux-x64
+          run_one linux/arm64 deepline-linux-arm64
+```
+
+(GitHub's ubuntu runners are x64, so `linux/amd64` is native and `linux/arm64`
+runs under QEMU — enough to confirm the binaries execute and print a version.)
+
+### Cross-platform validation (done locally via Docker, no Node in-container)
+
+| Check | Result |
+| --- | --- |
+| `deepline-linux-arm64` runs on debian/glibc, no Node | pass |
+| `deepline-linux-x64` **default** target on a no-AVX CPU | **aborts** (`CPU lacks AVX`) → use `-baseline` |
+| `deepline-linux-x64` **baseline** target on a no-AVX CPU | pass |
+| glibc binary on Alpine/musl (raw) | cryptic `not found` (why the launcher guards) |
+| launcher musl guard on Alpine | clean JSON error, refuses to exec |
+| launcher full flow on debian (download → checksum → cache → exec) | pass, no Node |
+| `deepline-darwin-arm64` on macOS, no Node on PATH | pass |
 
 ## 2. Sync `cli-version` + `checksums.txt` back into `deepline-plugins`
 

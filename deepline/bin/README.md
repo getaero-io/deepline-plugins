@@ -30,6 +30,16 @@ installed, so `deepline` just works after `/plugin install deepline@deepline`.
 | `cli-version` | the pinned CLI version; the launcher downloads the matching `sdk-v<version>` release |
 | `checksums.txt` | `<sha256>  deepline-<os>-<arch>` for each platform binary in that release |
 
+## Platform notes
+
+- **x64 uses bun's `-baseline` compile target.** The default `bun-linux-x64` /
+  `bun-darwin-x64` binaries require AVX CPU instructions and abort on hosts
+  without them (older/budget cloud VMs, some shared tiers). The release workflow
+  compiles the x64 assets with `bun-<os>-x64-baseline` so they run everywhere;
+  the asset name stays `deepline-<os>-x64`, so this launcher is unaffected.
+- **glibc only.** The binaries are glibc-linked; the launcher fails with a clean
+  categorical error on musl (Alpine) rather than a cryptic loader crash.
+
 ## Keeping this in sync with the CLI
 
 `cli-version` + `checksums.txt` are produced by the Deepline SDK release
