@@ -72,7 +72,14 @@ Then try:
 /deepline-quickstart
 ```
 
-If the CLI is not installed yet, the skill will tell Claude to run:
+On Claude Code the plugin bundles the CLI as a **standalone launcher**
+(`deepline/bin/deepline`), which Claude Code adds to `PATH` automatically. On
+first use it downloads and checksum-verifies the matching platform binary from
+the `sdk-v<version>` release — **no `npm install -g` and no Node required**. See
+[`deepline/bin/README.md`](deepline/bin/README.md).
+
+If the bundled launcher is unavailable (e.g. an older plugin version), the skill
+falls back to installing the CLI via npm:
 
 ```bash
 npm install -g deepline
