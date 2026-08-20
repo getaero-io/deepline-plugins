@@ -46,12 +46,10 @@ Selecting a folder lets Deepline persist auth in that workspace, so future Cowor
 If the CLI is not installed yet, the skill will tell Claude to run:
 
 ```bash
-npm install -g deepline
-# Fallback for secure sandboxes: mkdir -p "$HOME/.local" && npm config set prefix "$HOME/.local" && export PATH="$HOME/.local/bin:$PATH" && npm install -g deepline --registry https://code.deepline.com/api/v2/npm/
-deepline auth register --wait auto
-deepline auth wait --timeout 120 # completes Cowork/browser approval; no-op if already connected
-deepline auth status
-deepline -h
+npm install -g deepline@latest
+# Fallback for secure sandboxes: mkdir -p "$HOME/.local" && npm config set prefix "$HOME/.local" && export PATH="$HOME/.local/bin:$PATH" && npm install -g deepline@latest --registry https://code.deepline.com/api/v2/npm/
+deepline setup --json
+deepline auth wait --timeout 120 # only if you approved in the browser after setup returned; no-op if already connected
 ```
 
 Team and Enterprise plans: your organization owner may need to enable Cowork for the workspace. They may also need to allow internet access for all domains, or add the domains you use, in Cowork's network settings. See [Use Claude Cowork on Team and Enterprise plans](https://support.claude.com/en/articles/13455879-use-claude-cowork-on-team-and-enterprise-plans).
@@ -75,12 +73,10 @@ Then try:
 If the CLI is not installed yet, the skill will tell Claude to run:
 
 ```bash
-npm install -g deepline
-# Fallback for secure sandboxes: mkdir -p "$HOME/.local" && npm config set prefix "$HOME/.local" && export PATH="$HOME/.local/bin:$PATH" && npm install -g deepline --registry https://code.deepline.com/api/v2/npm/
-deepline auth register --wait auto
-deepline auth wait --timeout 120 # completes Cowork/browser approval; no-op if already connected
-deepline auth status
-deepline -h
+npm install -g deepline@latest
+# Fallback for secure sandboxes: mkdir -p "$HOME/.local" && npm config set prefix "$HOME/.local" && export PATH="$HOME/.local/bin:$PATH" && npm install -g deepline@latest --registry https://code.deepline.com/api/v2/npm/
+deepline setup --json
+deepline auth wait --timeout 120 # only if you approved in the browser after setup returned; no-op if already connected
 ```
 
 ## Auth
@@ -88,14 +84,17 @@ deepline -h
 If Deepline asks you to authenticate:
 
 ```bash
-deepline auth register --wait auto
-deepline auth wait --timeout 120 # completes Cowork/browser approval; no-op if already connected
+deepline setup --json
 deepline auth status
-deepline -h
 ```
 
-`--wait auto` waits locally and returns after printing the approval link in
-Cowork. `auth wait` is safe in both places.
+`deepline setup` registers this machine, prints or opens the approval link, and
+verifies the result. If you approved in a browser after setup already returned,
+finish with:
+
+```bash
+deepline auth wait --timeout 120 # no-op if already connected
+```
 
 ## Verify
 
