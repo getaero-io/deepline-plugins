@@ -1,6 +1,6 @@
 {
   "name": "deepline",
-  "version": "1.1.545",
+  "version": "1.1.546",
   "description": "Deepline GTM skills for Claude Code and Cowork. Each skill includes npm CLI install and auth setup.",
   "author": {
     "name": "Deepline"
