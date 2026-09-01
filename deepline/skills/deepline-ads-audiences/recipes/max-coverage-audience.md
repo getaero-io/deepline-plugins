@@ -102,6 +102,7 @@ Use provider hashes as-is when they are valid SHA-256:
 
 - Aviato hash provider on all eligible rows with LinkedIn/profile context, including rows that already have work-email hashes.
 - LimaData audience identifier hashes on rows still missing a personal hash after Aviato, or as first provider when that is more cost-effective for the available inputs.
+- On lists of a few thousand rows or more, submit these through the async `limadata_batch_ad_audiences` job rather than per-row calls. It bills per resolved row instead of per attempt, so misses are free and the whole list can be sent without pre-filtering. → Read `shared/limadata-batch.md`.
 
 Extract hashes only from explicit hash fields such as:
 
