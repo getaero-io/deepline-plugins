@@ -45,6 +45,7 @@ This skill is not for cold outbound, sequencing, or copywriting. Personal emails
 | "sample ABM segment", "do the example workflow"                          | Follow the reusable high-priority ABM segment recipe.              | `recipes/sample-abm-segment-example.md`                   |
 | "use ContactOut hashes", "hashed identifiers", "LinkedIn URLs to hashes" | Plan a bulk pass beside the ladder, not a waterfall step.          | `shared/contactout-hash-pool.md`                          |
 | "what is a hash", "why is my match rate low", first-time user            | Explain the mechanic before quoting a plan.                        | `shared/audience-basics.md`                               |
+| "what will this cost", "estimate the spend", "how much for N contacts", setting a budget cap | Read real rates from the billing ledger; describe returns no price. | `shared/pricing-lookup.md`                                |
 | encoded/internal-identifier LinkedIn URLs (`/in/ACwAA…`), "API rejected my LinkedIn URLs", "convert LinkedIn URLs" | Normalize `person_linkedin_url` before upload: drop encoded, recover vanity. | Step 4 → "Normalize LinkedIn URLs" (this file)            |
 | "Make sure hashes are not double hashed"                                 | Run the no-double-hash audit play before upload.                   | `plays/audit-no-double-hash.play.ts`                      |
 | "enrich this list", "buy personal emails/hashes", "run the ladder"       | Run the waterfall. Each layer only sees rows still missing a hash. | `plays/enrich-audience-waterfall.play.ts`                 |
@@ -251,7 +252,13 @@ Run the cheapest per-call provider first so it absorbs the easy hits. A low hit
 rate on the remainder means the pool is exhausted: LeadMagic cost 4.76 USD to
 establish that, where a per-call provider bills the same for the same answer.
 
-Stop after the hash providers by default. Report attempted rows, row hits, unique hashes added, contacts still missing personal hashes, and Deepline spend. Then ask whether the user wants to spend more on broader raw personal-email providers, quoting the current per-contact cost from `deepline tools describe <tool_id> --json` rather than a remembered figure. Rates change, and a stale quote in an approval gate is how users end up agreeing to a number that no longer holds.
+Stop after the hash providers by default. Report attempted rows, row hits, unique hashes added, contacts still missing personal hashes, and Deepline spend. Then ask whether the user wants to spend more on broader raw personal-email providers, quoting the current per-contact cost rather than a remembered figure. Rates change, and a stale quote in an approval gate is how users end up agreeing to a number that no longer holds.
+
+Get that cost from the billing ledger, not from `deepline tools describe`. The
+describe output carries no price for these providers; it returns `Provider
+pricing details redacted.` and occasionally a `bestFor` line that contradicts
+the real charge. → Read `shared/pricing-lookup.md` before quoting any number or
+setting a budget cap.
 
 Only run the expanded coverage pass after explicit approval. In that pass, try providers such as LeadMagic, ContactOut, Wiza, Datagma, Crustdata, Prospeo, FullEnrich, PDL, or Deepline native personal-email waterfalls on rows still missing personal hashes. Normalize and SHA-256 hash raw personal emails exactly once, record provider-level lift and Deepline spend, and keep the default upload payload hash-only.
 
@@ -491,6 +498,7 @@ Do not expose provider-side unit costs in customer-facing messages. Report Deepl
 | If you're about to…                                                 | Read                                           |
 | ------------------------------------------------------------------- | ---------------------------------------------- |
 | Explain hashing, match rate, or platform rules to a first-time user | `shared/audience-basics.md`                    |
+| Quote a cost, estimate a run, or set a budget cap                   | `shared/pricing-lookup.md`                     |
 | Plan or run a ContactOut hashed-identifier pass                     | `shared/contactout-hash-pool.md`               |
 | Enrich and upload to Meta and Google end to end                     | `recipes/enrich-and-upload-facebook-google.md` |
 | Push a list as far as the budget allows                             | `recipes/max-coverage-audience.md`             |
