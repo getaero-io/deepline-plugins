@@ -45,6 +45,7 @@ This skill is not for cold outbound, sequencing, or copywriting. Personal emails
 | "sample ABM segment", "do the example workflow"                          | Follow the reusable high-priority ABM segment recipe.              | `recipes/sample-abm-segment-example.md`                   |
 | "use ContactOut hashes", "hashed identifiers", "LinkedIn URLs to hashes" | Plan a bulk pass beside the ladder, not a waterfall step.          | `shared/contactout-hash-pool.md`                          |
 | "what is a hash", "why is my match rate low", first-time user            | Explain the mechanic before quoting a plan.                        | `shared/audience-basics.md`                               |
+| lists of a few thousand rows or more, "bulk", "batch this list"          | Use the async LimaData batch job instead of per-row calls.         | `shared/limadata-batch.md`                                |
 | encoded/internal-identifier LinkedIn URLs (`/in/ACwAA…`), "API rejected my LinkedIn URLs", "convert LinkedIn URLs" | Normalize `person_linkedin_url` before upload: drop encoded, recover vanity. | Step 4 → "Normalize LinkedIn URLs" (this file)            |
 | "Make sure hashes are not double hashed"                                 | Run the no-double-hash audit play before upload.                   | `plays/audit-no-double-hash.play.ts`                      |
 | "enrich this list", "buy personal emails/hashes", "run the ladder"       | Run the waterfall. Each layer only sees rows still missing a hash. | `plays/enrich-audience-waterfall.play.ts`                 |
@@ -203,7 +204,7 @@ Default personal-email waterfall for B2B paid ads:
 
 1. Baseline first-party identifiers: valid work emails, names, company, country, postal code, LinkedIn URLs, and stable external IDs.
 2. Aviato `aviato_pull_email_hash`: run on all eligible rows with enough identity context, including rows that already have work emails. Use it when the goal is ad upload and the provider returns paid-ads-ready personal email hashes. If the output cell is a JSON object, extract the scalar hash from `matched_result`, `result.data.hashedEmails[0]`, `result.data.hashed_email`, or equivalent hash fields. Do not treat the JSON object string as the upload value.
-3. LimaData `limadata_find_audience_identifiers`: run on rows still missing a personal hash after Aviato, or run it first when the user asks for the most cost-effective expansion pass. Extract only normalized 64-character SHA-256 hashes from `matched_result`, `result.data.hashed_emails[].normalized_hash`, `hash`, or `sha256` fields.
+3. LimaData `limadata_find_audience_identifiers`: run on rows still missing a personal hash after Aviato, or run it first when the user asks for the most cost-effective expansion pass. On lists of a few thousand rows or more, use the async `limadata_batch_ad_audiences` job instead of per-row calls — it bills per resolved row rather than per attempt. → Read `shared/limadata-batch.md`. Extract only normalized 64-character SHA-256 hashes from `matched_result`, `result.data.hashed_emails[].normalized_hash`, `hash`, or `sha256` fields.
    ContactOut hashed identifiers do not belong in this numbered list, because they cannot waterfall. Run them as a separate bulk pass. See the section below.
 
 ### ContactOut hashed identifiers (quick reference)
@@ -491,6 +492,7 @@ Do not expose provider-side unit costs in customer-facing messages. Report Deepl
 | If you're about to…                                                 | Read                                           |
 | ------------------------------------------------------------------- | ---------------------------------------------- |
 | Explain hashing, match rate, or platform rules to a first-time user | `shared/audience-basics.md`                    |
+| Enrich a list of a few thousand rows or more in one job              | `shared/limadata-batch.md`                     |
 | Plan or run a ContactOut hashed-identifier pass                     | `shared/contactout-hash-pool.md`               |
 | Enrich and upload to Meta and Google end to end                     | `recipes/enrich-and-upload-facebook-google.md` |
 | Push a list as far as the budget allows                             | `recipes/max-coverage-audience.md`             |
