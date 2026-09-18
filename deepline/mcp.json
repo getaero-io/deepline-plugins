@@ -1,0 +1,9 @@
+{
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/mcp.schema.json",
+  "mcpServers": {
+    "deepline": {
+      "type": "streamable-http",
+      "url": "https://code.deepline.com/api/v2/mcp"
+    }
+  }
+}
