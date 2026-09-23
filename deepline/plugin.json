@@ -1,7 +1,7 @@
 {
   "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
   "name": "deepline",
-  "version": "1.1.666",
+  "version": "1.1.667",
   "description": "Deepline GTM skills for Claude Code and Cowork. Each skill includes npm CLI install and auth setup.",
   "author": {
     "name": "Deepline"
