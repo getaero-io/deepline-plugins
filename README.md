@@ -43,7 +43,7 @@ Selecting a folder lets Deepline persist auth in that workspace, so future Cowor
 
 ![Deepline quickstart running in Cowork](assets/cowork-quickstart.png)
 
-If the CLI is not installed yet, the skill will tell Claude to run:
+If the CLI is not installed yet, have Claude follow https://code.deepline.com/INSTALL.md so it selects the command for the local npm version. For manual recovery on npm older than 11.16, run:
 
 ```bash
 npm install -g deepline@latest
@@ -70,7 +70,7 @@ Then try:
 /deepline-quickstart
 ```
 
-If the CLI is not installed yet, the skill will tell Claude to run:
+If the CLI is not installed yet, have Claude follow https://code.deepline.com/INSTALL.md so it selects the command for the local npm version. For manual recovery on npm older than 11.16, run:
 
 ```bash
 npm install -g deepline@latest
