@@ -1,8 +1,8 @@
 # Deepline Skills Plugin
 
-Deepline adds GTM skills to Claude Cowork and Claude Code. Each installed skill includes the Deepline CLI setup commands, so the plugin is only a skills bundle.
+Deepline adds GTM skills to Claude Cowork and Claude Code. Use them to build prospect lists, enrich CSVs, research accounts, write outbound, and run Deepline workflows from Claude.
 
-Use it to build prospect lists, enrich CSVs, research accounts, write outbound, and run Deepline workflows from Claude.
+The plugin is a skills bundle: it runs no local code at install. Each skill includes the Deepline CLI setup commands, and the CLI talks to your Deepline workspace. Start with `/deepline-quickstart`; `/deepline-gtm` covers most prospecting, enrichment, and Play work.
 
 ## Install In Claude Cowork
 
@@ -81,16 +81,16 @@ deepline auth wait --timeout 120 # only if you approved in the browser after set
 
 ## Auth
 
-If Deepline asks you to authenticate:
+If Deepline asks you to authenticate, ask Claude to run:
 
 ```bash
 deepline setup --json
-deepline auth status
 ```
 
-`deepline setup` registers this machine, prints or opens the approval link, and
-verifies the result. If you approved in a browser after setup already returned,
-finish with:
+`deepline setup` registers this machine and prints or opens the approval link.
+Approve the workspace you intend to use, and keep the same project folder
+afterwards. In Cowork, setup returns before you approve; once you have approved
+in the browser, finish with:
 
 ```bash
 deepline auth wait --timeout 120 # no-op if already connected
@@ -103,8 +103,29 @@ Ask Claude to run:
 ```bash
 command -v deepline
 deepline --version
-deepline auth status
+deepline auth status --json
 ```
+
+The first two commands check that the CLI is installed. The last one checks
+which workspace you are authorized for; a version string alone does not prove
+workspace access. If setup fails, run `deepline doctor --json` and follow the
+next action it reports.
+
+## Where Data Goes
+
+The plugin declares no connectors. Its skills send data only through the
+Deepline CLI to Deepline at `code.deepline.com`, which runs your requests
+against Deepline's data providers. The provider list ships in the
+`deepline-gtm` skill. Results are saved in your project folder and in your
+Deepline workspace. See the [privacy policy](https://deepline.com/privacy) for
+how Deepline handles and retains data.
+
+## Support
+
+- [Deepline plugin docs](https://deepline.com/docs/claude-plugins)
+- [Deepline Cowork guide](https://deepline.com/docs/claude-cowork)
+- [Contact Deepline](https://deepline.com/contact)
+- [Privacy policy](https://deepline.com/privacy) · [Terms of service](https://deepline.com/terms)
 
 ## References
 

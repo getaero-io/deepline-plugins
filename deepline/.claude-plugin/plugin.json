@@ -1,11 +1,15 @@
 {
   "name": "deepline",
-  "version": "1.1.896",
-  "description": "Deepline GTM skills for Claude Code and Cowork. Each skill includes npm CLI install and auth setup.",
+  "version": "1.1.897",
+  "description": "Prospect, enrich, research accounts, and run GTM workflows from Claude with Deepline. Each skill includes Deepline CLI install and auth setup.",
   "author": {
     "name": "Deepline"
   },
   "homepage": "https://code.deepline.com",
+  "supportUrl": "https://deepline.com/contact",
+  "documentationUrl": "https://deepline.com/docs/claude-plugins",
+  "privacyPolicyUrl": "https://deepline.com/privacy",
+  "termsOfServiceUrl": "https://deepline.com/terms",
   "repository": "https://github.com/getaero-io/deepline-plugins",
   "license": "MIT",
   "keywords": [
