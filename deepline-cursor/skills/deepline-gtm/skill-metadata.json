@@ -1,0 +1,92 @@
+{
+  "title": "GTM Meta Skill",
+  "documents": {
+    "SKILL.md": {
+      "kind": "entrypoint",
+      "title": "GTM Meta Skill",
+      "tags": ["gtm", "router"],
+      "providers": []
+    },
+    "writing-outreach.md": {
+      "kind": "guide",
+      "title": "Writing Outreach",
+      "tags": ["qualification", "email", "outreach"],
+      "providers": []
+    },
+    "references/clay-action-mappings.md": {
+      "kind": "reference",
+      "title": "Clay Action Mappings",
+      "tags": ["reference", "clay"],
+      "providers": []
+    },
+    "references/clay-api-surface.md": {
+      "kind": "reference",
+      "title": "Clay Internal API Surface",
+      "tags": ["reference", "clay"],
+      "providers": []
+    },
+    "references/clay-extraction.md": {
+      "kind": "reference",
+      "title": "Clay Extraction",
+      "tags": ["reference", "clay"],
+      "providers": []
+    },
+    "references/run-events.md": {
+      "kind": "reference",
+      "title": "Run Logs and Events",
+      "tags": ["cli", "logs", "debugging"],
+      "providers": []
+    },
+    "references/monitor-contract-reference.md": {
+      "kind": "reference",
+      "title": "Monitor Contract Reference",
+      "tags": ["reference", "monitors"],
+      "providers": []
+    },
+    "references/monitor-operations.md": {
+      "kind": "reference",
+      "title": "Monitor Operations",
+      "tags": ["reference", "monitors"],
+      "providers": []
+    },
+    "references/industry-radars.md": {
+      "kind": "reference",
+      "title": "Industry Radars",
+      "tags": ["reference", "monitors"],
+      "providers": []
+    },
+    "recipes/developer-signals.md": {
+      "kind": "specialized-workflow",
+      "title": "Developer Signals",
+      "tags": [
+        "recipe",
+        "developer",
+        "intent",
+        "github",
+        "identity-resolution",
+        "account-scoring"
+      ],
+      "providers": []
+    }
+  },
+  "prefixes": {
+    "references/": {
+      "kind": "reference",
+      "title": "Reference",
+      "tags": ["reference"],
+      "providers": []
+    },
+    "recipes/": {
+      "kind": "specialized-workflow",
+      "title": "Recipe",
+      "tags": ["recipe"],
+      "providers": []
+    }
+  },
+  "default_document": {
+    "kind": "other",
+    "title": "Document",
+    "tags": [],
+    "providers": []
+  }
+}

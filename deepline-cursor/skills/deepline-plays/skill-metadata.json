@@ -1,0 +1,17 @@
+{
+  "title": "Deepline Plays (now part of deepline-gtm)",
+  "documents": {
+    "SKILL.md": {
+      "kind": "entrypoint",
+      "title": "Deepline Plays (now part of deepline-gtm)",
+      "tags": ["deprecated", "alias", "plays"],
+      "providers": []
+    }
+  },
+  "default_document": {
+    "kind": "other",
+    "title": "Document",
+    "tags": [],
+    "providers": []
+  }
+}

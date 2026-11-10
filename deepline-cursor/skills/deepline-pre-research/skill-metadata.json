@@ -1,0 +1,10 @@
+{
+  "documents": {
+    "SKILL.md": {
+      "kind": "entrypoint",
+      "title": "Deepline Pre-Research (renamed to deepline-research)",
+      "tags": ["deprecated", "alias", "research"],
+      "providers": []
+    }
+  }
+}

@@ -1,0 +1,136 @@
+---
+name: deepline-engine
+description: 'Build, publish, and verify a Deepline Play as a durable state machine over Customer DB tables, including a small paid pilot. Invoke this skill explicitly when the user asks to build an engine.'
+disable-model-invocation: true
+---
+
+# Deepline Engine
+
+## Quick Start
+
+```bash
+npm install -g deepline
+deepline -h
+```
+
+## CLI resolution
+
+Run `deepline` when it is available. If the shell reports that command is missing, use `<workspace-root>/.deepline/runtime/bin/deepline` (or the npm-created `.cmd` shim on Windows). If neither exists, follow `https://code.deepline.com/INSTALL.md` to set up Deepline.
+
+Build an engine from the state machine the user defines.
+
+An engine is an orchestrator Deepline Play that accepts an input, determines its state, calls the transition Play for that state, and produces a new state. The durable data plane lives in Customer DB: every state has an input table and an output table. The output of one transition can become the input to the next state.
+
+The user owns the states, transition rules, transformations, and terminal behavior. This skill owns the reusable structure for turning those decisions into a replay-safe Play. Infer routine names, schemas, advancement behavior, and implementation details from the request and repository conventions. Ask only when missing information would force the engine to invent substantive business policy or create an unsafe side effect. Do not import an outbound workflow, GTM recipes, provider choices, or domain-specific policy unless the user asks for them.
+
+## Core model
+
+For each state, define:
+
+| Part            | Meaning                                                                             |
+| --------------- | ----------------------------------------------------------------------------------- |
+| Input table     | Rows waiting to be handled in this state                                            |
+| State decision  | The user-defined rule that establishes the row's current state                      |
+| Transition Play | The child Play that performs the transformation for this state                      |
+| Output table    | The input, result, transition status, and next state                                |
+| Next input      | The row admitted to the next state's input table, unless the transition is terminal |
+
+Keep the state decision explicit. Inferring state from incidental fields creates transitions the user did not define and makes replay behavior hard to explain.
+
+## Workflow
+
+1. **Capture the state machine.** Extract the states, initial state, terminal states, allowed transitions, state-decision rules, and transformation for each state from the request and available project context. Resolve routine omissions with explicit, reported assumptions. Ask only when competing interpretations would materially change business behavior.
+2. **Define row identity.** Choose the stable business key and a transition idempotency key. A retry must address the same row and transition instead of creating a second result.
+3. **Define the tables.** Give every state an input table and an output table in Customer DB. Infer clear names and domain columns from the state machine and repository conventions. Record the structural fields needed to connect an input, its result, and the next state.
+4. **Choose a durable source directory.** Generate the engine under a maintained project directory inferred from repository conventions. Keep the orchestrator at the engine directory's top level and new child Plays in descriptive subfolders, alongside shared types, README, and Mermaid diagram as project source. Do not use an ignored `tmp/` scaffold; temporary paths hide work from version control and make the engine disposable.
+5. **Resolve every transition Play before authoring one.** Search callable Plays visible to the user's workspace with `deepline search "<transition input -> transition outcome>" --type plays`. Inspect owned and prebuilt candidates with `deepline describe <name>`. Reuse an exact contract match; names are only hints, so verify input, output, and inline-composition compatibility. If no candidate fits, author one new Play for that transition instead of embedding its transformation in the orchestrator.
+6. **Author the orchestrator Play.** Write a `.play.ts` file that default-exports an async function of its input (`import deepline from 'deepline'; export default async function (input: EngineInput) { ... return { ... }; }`; the file name is the default Play name, `export const config = { name }` overrides it). Determine the state, select the matching transition Play, and call it through `deepline.runPlay(...)` with a stable key. The orchestrator owns state routing and Customer DB persistence; transition Plays own transformations.
+7. **Persist the transition.** Materialize the accepted input, the child Play result, `from_state`, `to_state`, status, error or miss information, timestamps, workflow version, transition Play identity/version, and idempotency key. If the transition continues, write the next state's input idempotently.
+8. **Choose the advancement model.** Infer one transition per invocation or multiple transitions per invocation from the workflow. Default to multiple transitions through terminal completion when no external event must occur between states. Record the choice and its retry and observability implications instead of pausing for confirmation.
+9. **Validate every edge.** Check every new transition Play and the orchestrator. Before the paid-pilot gate, use static checks and provider-free fixtures to test each allowed transition, each terminal state, an invalid or unknown state, a child Play failure, an invalid state returned by a child, and replay of a completed transition. Defer provider-executing edge tests for this new engine to its bounded authoring pilot after caps and workspace authorization are verified. A separate post-fix acceptance follows [references/post-fix-verification.md](references/post-fix-verification.md).
+10. **Publish and verify.** After checks pass, publish new child Plays in dependency order, check the orchestrator against their live contracts, publish it, and verify every live version. Apply and verify the UI folder layout below for the orchestrator and every new child Play. Stop on failure instead of advancing with an unresolved dependency.
+11. **Run a small paid pilot.** Before this authoring pilot or the first publication of paid code, check live balance and pricing, choose one to three synthetic records, and set `billing.maxCreditsPerRun` on the orchestrator and every newly authored provider-backed child. Disclose the aggregate pilot exposure as the maximum top-level run count multiplied by the orchestrator cap; each run resets a per-run cap. Publish only capped paid Plays. Run this multi-record authoring pilot only in an explicit internal/test workspace. Do not use third-party customer workspaces, credentials, credits, or data. If no eligible internal/test workspace is available, stop and report the blocker; do not substitute the operator's personal workspace for this broader pilot. The distinct one-case post-fix acceptance may use an owner-verified operator personal or designated Deepline Production workspace under [references/post-fix-verification.md](references/post-fix-verification.md). Re-run one completed record with the same idempotency key to prove replay safety without buying the transition twice, counting that attempt in the aggregate bound even though a correct replay costs zero. Stop after the pilot if outputs are wrong, coverage is poor, or cost per usable result is too high. If the engine has no paid transition, run the same live pilot and report zero spend instead of adding a provider merely to create a charge. Do not use real customer rows or install triggers.
+
+Read [references/state-machine-contract.md](references/state-machine-contract.md) when designing the transition table, Customer DB table roles, Play shape, and tests.
+
+## Organize Plays for UI navigation
+
+Put the orchestrator in an engine folder and newly authored sub-plays in descriptive subfolders beneath it. For example, keep the orchestrator at `team/<engine>` and transition Plays at `team/<engine>/Transitions/<state>`. Group helpers under `team/<engine>/Helpers` when needed. This keeps the engine's entry point easy to find and lets users browse its supporting Plays by purpose.
+
+Local source subfolders do not set the UI location. After publication, set each Play's `path` setting with the CLI, then read it back:
+
+```bash
+deepline plays settings set --play <orchestrator-name> --name path --value "team/<engine>"
+deepline plays settings set --play <transition-name> --name path --value "team/<engine>/Transitions/<state>"
+deepline plays settings get --play <orchestrator-name> --name path
+deepline plays settings get --play <transition-name> --name path
+```
+
+Choose folder names from the user's engine and state names, following existing workspace conventions. Use `deepline plays settings describe --name path` and `deepline plays settings set --help` to confirm the current path contract. Keep stable Play names and `deepline.runPlay` references; folders organize navigation without renaming callable identities. Leave reused workspace and prebuilt Plays in their existing locations, since moving a shared dependency would disrupt other workflows.
+
+## Invariants
+
+- Keep the engine as an orchestrator Play and every transformation as a transition Play. A switch statement full of embedded business transformations hides reusable work and is not the engine architecture.
+- Keep generated engine artifacts in a durable, maintained project directory. The orchestrator, child Plays, types, README, and Mermaid diagram are source, not an ignored `tmp/` scaffold.
+- Search the user's callable Plays and Deepline prebuilts before creating a transition Play. Reimplementing an existing contract creates duplicate behavior that will drift.
+- Accept a reused Play only when its described input/output contract and composition shape fit the transition. A child that owns `deepline.dataset()`, `deepline.csv()`, event waits, or another lifecycle boundary cannot be composed with `deepline.runPlay`; create or adapt a scalar transition Play instead.
+- Let the user's state machine drive the implementation. Do not ship a canned business workflow under generic names.
+- Give each state distinct input and output table roles. Combine them only when existing project conventions clearly require it and the transition history remains unambiguous; report that assumption.
+- Persist engine state with idempotent, schema-qualified Customer DB mutations. `deepline.dataset(...)` creates a run-scoped Runtime Sheet and cannot replace the durable state input and output tables.
+- Persist the original input alongside or by stable reference from the output. A result without its input cannot be audited or replayed safely.
+- Persist a typed failed or invalid output before rethrowing a child failure, unknown state, or forbidden child result. Failure outcomes use the same transition idempotency key and never create a next-state handoff.
+- Make state transitions idempotent. A retry may repair an incomplete handoff, but it must not duplicate a completed output or next-state input.
+- Treat unknown states and forbidden transitions as loud failures. Falling through to a default process silently corrupts the machine.
+- Keep customer workflow rows and state-transition data in Customer DB. Product control-plane state used by Deepline UI/API/CLI, credentials, billing, and platform run state remain in their Deepline-owned stores, including Convex where applicable.
+- Use stable Play names, dataset names, row keys, step ids, and tool ids. Renaming durable identities can make completed work look new.
+- Treat an explicit request to build an engine as authorization to publish the checked engine. Run the bounded paid pilot automatically only in an explicit internal/test workspace. The separate post-fix acceptance uses the targets and budget in [references/post-fix-verification.md](references/post-fix-verification.md); neither path authorizes a third-party customer workspace or real customer data, trigger installation, a larger run, or unrelated Customer DB mutations.
+
+## Automatic publication and verification
+
+This user-requested engine pilot is separate from product-fix verification. Do
+not use a third-party customer's workspace or data to verify a Deepline fix.
+For a post-fix paid-path check, use only the explicitly operator-owned personal
+workspace or designated Deepline internal Production workspace allowed by
+[references/post-fix-verification.md](references/post-fix-verification.md); this skill's customer-pilot
+approval path does not override that rule. That one post-fix acceptance is
+required when the fix depends on a real paid-provider response or Production
+usage admission/settlement, even if this engine-authoring pilot already passed.
+Use the runbook's one-case cap and keep its ordinary settled charge; the
+pilot's multi-record/replay and credit-restoration rules do not apply to it.
+
+After implementation checks pass, complete one dependency-ordered workflow:
+
+1. Read live Deepline balance and pricing, select at most three pilot records, calculate a per-run cap, and disclose the aggregate bound as `(pilot runs + one replay attempt) × billing.maxCreditsPerRun`. If credits are unavailable, stop without attempting a top-up.
+2. Set a static `billing.maxCreditsPerRun` on every newly authored provider-backed child before its first check or publication. A child cap must be no greater than the orchestrator cap so launching the published child directly cannot bypass the pilot bound.
+3. Check and publish the capped children required for `deepline.runPlay` name and contract resolution. Never publish an uncapped revision of a newly authored paid child.
+4. Set the orchestrator's static `billing.maxCreditsPerRun` before its first check or publication.
+5. Check the capped orchestrator against the published child contracts.
+6. Publish the capped orchestrator.
+7. Verify every publication with `deepline plays get <name>`: read its `Live version` and `Live max credits per run` lines, which come from the live revision, not a working revision. If the cap is not a literal, read it from `deepline plays get <name> --source --live`. Reconcile that live version with the publication result and `deepline plays versions --name <name>`. `deepline describe` and revision summaries do not expose the billing limit and cannot prove the cap by themselves.
+8. Confirm the new-engine authoring pilot uses an explicit internal/test workspace. Do not run the multi-record pilot in a customer workspace. For a code fix that requires the separate one-case paid Production acceptance, use only the owner-verified personal workspace or designated Deepline Production workspace in [references/post-fix-verification.md](references/post-fix-verification.md).
+9. Run the selected synthetic records through the real paid transitions to terminal completion with `deepline run <orchestrator-name> --input '{...}'`; keep the run id and cost from each receipt.
+10. Replay one completed transition by rerunning its record with the same command and idempotency key, without `--fresh`, and verify that it produces no duplicate charge, output, or handoff.
+11. Compare persisted state, final output, observed spend, and replay behavior with the state-machine contract. The authoring pilot runs in an internal/test workspace. For the separate post-fix Production acceptance, keep the normal settled usage record and restore only separately allocated fixture funding, as the runbook requires.
+
+Do not request approval during dependency publication. If the explicit internal/test workspace is unavailable or any check, publication, version verification, or pilot run fails, stop the workflow, preserve successful results, and report the exact blocker or failure rather than switching to a customer workspace or advancing with an unresolved dependency.
+
+The automatic paid pilot is bounded to synthetic inputs, at most three records plus one replay attempt, and the disclosed aggregate maximum derived from the published `billing.maxCreditsPerRun`. Obtain separate approval before using real customer data, installing triggers, scaling beyond the pilot, or causing other external side effects. Scaling requires a newly checked and published revision with the approved Deepline-credit cap; never silently remove or raise the pilot cap.
+
+## Deliverable
+
+Return:
+
+- the resolved state and transition table, including inferred assumptions
+- a Mermaid `stateDiagram-v2` diagram showing the complete state machine, including initial, terminal, and unresolved transitions
+- the input/output table contract for every state
+- the transition-Play reuse inventory, including owned and prebuilt candidates considered
+- the maintained project source directory and source tree
+- the implemented orchestrator `.play.ts` file and any newly required transition `.play.ts` files
+- shared type source, a project README, and the Mermaid diagram as a maintained project file
+- the state-decision and `deepline.runPlay` dispatch logic
+- the idempotency and replay strategy
+- the checks run and their actual results
+- the paid pilot inputs and final outputs, observed Deepline spend, orchestrator and provider-backed child caps, aggregate bound, replay result, and any required customer-credit restoration receipt
+- unresolved decisions or actions still requiring approval
+
+Retain the exact per-step trace for each paid pilot record, including state determination, child Play calls, provider calls, persistence, handoffs, terminal completion, charges, and the replay attempt. Keep the default deliverable concise: show each pilot input and final output, not the full traces. Tell the user the traces are available and show them only when requested.

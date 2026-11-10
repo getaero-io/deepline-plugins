@@ -1,0 +1,367 @@
+# Writing Outreach Skill
+
+Use this skill when the task involves cold emails, personalization, lead scoring, qualification, sequence design, campaign copy, or inspection of enrichment results.
+
+## What This Skill Does
+
+- Loads ICP/criteria context from a local file (for example `./icp.md`) using the agent’s local file reader.
+- Produces strict, structured qualification output:
+  - numeric score (`0-10`)
+  - fit label (for example `Strong fit: 8/10`)
+  - rationale summary
+  - question-by-question yes/no/unknown answers with confidence and rationale
+- Produces strict, structured 4-step outbound email sequence:
+  - subject
+  - core value prop
+  - message body
+  - sequence-level rationale
+
+## Required Inputs
+
+- `prospect_payload`: Person + company context (JSON string/object in row)
+- `icp.md` (or equivalent): Local qualification criteria and positioning constraints
+
+## General Setup (Recommended)
+
+Create a small context pack in your working directory before running this flow:
+
+- `icp.md`: Ideal customer profile and disqualifiers
+- `qualification_questions.md`: The exact questions you want scored
+- `product_context.md`: Value props, proof points, and constraints
+- `copy_rules.md`: Tone, banned claims, length limits, CTA style
+
+Minimal folder layout:
+
+```text
+./context/
+  icp.md
+  qualification_questions.md
+  product_context.md
+  copy_rules.md
+```
+
+Example `icp.md` starter:
+
+```markdown
+# ICP
+
+## Best-fit companies
+
+- B2B SaaS, 200-5000 employees, multi-product GTM team
+- Uses modern data stack and CRM-based workflows
+
+## Best-fit personas
+
+- VP/Head/Director in Marketing, RevOps, Sales Ops, GTM Ops
+- Owns pipeline quality, segmentation, scoring, or campaign orchestration
+
+## Core pains
+
+- Slow GTM iteration due to analyst/engineering dependency
+- Low trust in black-box scoring
+- Weak signal-to-action workflow for reps
+
+## Disqualifiers
+
+- <20 employees
+- Pure B2C motion
+- No clear sales/marketing operations function
+```
+
+## Best Practices
+
+- Keep `icp.md` specific and opinionated. Broad ICPs create generic copy.
+- Separate facts vs assumptions in your context docs.
+- Put proof points in `product_context.md` so emails can reference them cleanly.
+- Define hard copy constraints in `copy_rules.md`:
+  tone, max words, banned phrases, allowed CTA types.
+- Use `Unknown` for missing evidence in qualification instead of guessing.
+- Run the QA prompt template before finalizing sequence copy.
+- Version your context docs with the campaign (`context-q1-enterprise.md`, etc.).
+
+## Output Contracts
+
+### Qualification JSON Contract
+
+```json
+{
+  "data": {
+    "score": 8,
+    "score_label": "Strong fit: 8/10",
+    "fit_band": "STRONG_FIT",
+    "rationale": "Short summary of fit and caveats.",
+    "qualification": {
+      "answers": [
+        {
+          "question": "string",
+          "answer": "Yes",
+          "confidence": "HIGH",
+          "rationale": "string"
+        }
+      ],
+      "summary": {
+        "positives": ["string"],
+        "risks": ["string"],
+        "next_checks": ["string"]
+      }
+    }
+  }
+}
+```
+
+### Email Sequence JSON Contract
+
+```json
+{
+  "data": {
+    "emails": [
+      {
+        "step": 1,
+        "subject": "string",
+        "coreValueProp": "string",
+        "email": "string"
+      }
+    ],
+    "sequence_rationale": "string"
+  }
+}
+```
+
+## Personalization: native callbacks and AI
+
+When you already have contact + company context in CSV columns, use a native Play callback for email generation when a deterministic template is enough. Use `deeplineagent` when you want AI help with reasoning, scoring, copy quality, or research.
+
+**Critical: avoid mail-merge output.** If every email has the same structure with only `{{first_name}}` and `{{company_name}}` swapped, it's a template — not personalized outreach. Each email must reference something specific to the company (product, use case, industry, recent news). Use `company_description`, `one_liner`, `company_research`, or other enrichment columns in your JS template or `deeplineagent` prompt so each email is substantively different.
+
+Author the generation column(s) as a custom play over your enriched CSV
+(see `deepline plays --help`) with
+one `withColumn` per output:
+
+- Fast path: a callback-based `withColumn` applying a deterministic template to typed row values.
+- AI path: a `deeplineagent` column with the research columns interpolated into
+  the prompt and a `jsonSchema` of `{subject, email}`.
+- Research-first path: a research `deeplineagent` column, then the generation
+  column consuming it.
+
+Notes:
+
+- `{{company_research}}` is the safe form for AI prompts when the prior column came from `deeplineagent`.
+- If you need a single field from prior research for deterministic template logic, extract it into its own scalar column with a native callback first, then reference that scalar column in later steps.
+- Inside a callback, use `row["company_research"]` or `row.company_research`. Read typed row values directly instead of brace interpolation.
+
+## Recommended Workflow
+
+Write the two columns as a play, `qualify.play.ts`. A play reads only its
+input, so the ICP and product context arrive as input fields:
+
+```ts
+import deepline from 'deepline';
+
+// The output contracts above, as JSON Schemas.
+const strictObject = (properties: Record<string, object>) => ({
+  type: 'object',
+  properties,
+  required: Object.keys(properties),
+  additionalProperties: false,
+});
+const QUALIFICATION_SCHEMA = strictObject({
+  data: strictObject({
+    score: { type: 'number' },
+    score_label: { type: 'string' },
+    fit_band: { type: 'string' },
+    rationale: { type: 'string' },
+  }),
+});
+const SEQUENCE_SCHEMA = strictObject({
+  data: strictObject({
+    emails: {
+      type: 'array',
+      items: strictObject({
+        step: { type: 'number' },
+        subject: { type: 'string' },
+        coreValueProp: { type: 'string' },
+        email: { type: 'string' },
+      }),
+    },
+    sequence_rationale: { type: 'string' },
+  }),
+});
+
+export const config = {
+  name: 'qualify-and-sequence',
+  description:
+    'Qualify prospects against the ICP and write a 4-step email sequence.',
+};
+
+export default async function (input: {
+  csv: string;
+  icp: string;
+  product: string;
+}) {
+  const prospects = await deepline
+    .dataset('prospects', await deepline.csv(input.csv))
+    .withColumn('qualification_output', async (row) => {
+      const result = await deepline.tools.execute({
+        id: 'qualification',
+        tool: 'deeplineagent',
+        input: {
+          model: 'openai/gpt-5.6-luna',
+          prompt: `You are a B2B qualification analyst. Use only the provided evidence.
+ICP context:
+${input.icp}
+Prospect payload:
+${row.prospect_payload}`,
+          jsonSchema: QUALIFICATION_SCHEMA,
+        },
+        description: 'Score this prospect against the ICP.',
+      });
+      return result.toolResponse.rawV2.result.object;
+    })
+    .withColumn('email_sequence_output', async (row) => {
+      const result = await deepline.tools.execute({
+        id: 'email_sequence',
+        tool: 'deeplineagent',
+        input: {
+          model: 'openai/gpt-5.6-luna',
+          prompt: `You are a B2B email strategist. Write 4 concise emails tied to the qualification output and product context.
+Product context:
+${input.product}
+Qualification payload:
+${JSON.stringify(row.qualification_output)}
+Prospect payload:
+${row.prospect_payload}`,
+          jsonSchema: SEQUENCE_SCHEMA,
+        },
+        description: 'Write a 4-step email sequence for this prospect.',
+      });
+      return result.toolResponse.rawV2.result.object;
+    })
+    .run({ key: 'id' });
+  return { prospects };
+}
+```
+
+Seed one prospect, then check and run the play:
+
+```bash
+deepline describe deeplineagent
+
+cat > ./qualification_email_seed.csv <<'CSV'
+id,prospect_payload
+cloudera-rfoster,"{""person"":{""firstName"":""Rachael"",""lastName"":""Foster"",""title"":""Vice President AMER Field Marketing, Public Sector, Services, & Community""},""company"":{""name"":""Cloudera"",""domain"":""cloudera.com""}}"
+CSV
+
+jq -n --rawfile icp ./context/icp.md --rawfile product ./context/product_context.md \
+  '{csv: "qualification_email_seed.csv", icp: $icp, product: $product}' > ./qualify-input.json
+
+deepline plays check qualify.play.ts
+deepline run qualify.play.ts --input-file ./qualify-input.json \
+  --csv-out "qualified-$(date +%Y%m%d-%H%M%S).csv"
+```
+
+## Prompt Templates (Copy/Paste)
+
+Use these as `prompt` values in `deeplineagent` input. Pair each prompt with a `jsonSchema` that matches the output contracts above. Recommended starting model: `openai/gpt-5.6-luna`.
+
+### 1) Score + Fit Label Template
+
+```json
+{
+  "prompt": "You are a B2B scoring analyst.\nReturn strict JSON only:\n{\"data\":{\"score\":0,\"score_label\":\"\",\"fit_band\":\"\",\"scoring\":{\"weights\":[{\"factor\":\"\",\"weight\":0,\"evidence\":\"\",\"impact\":\"positive|negative|neutral\"}],\"confidence\":\"HIGH|MEDIUM|LOW\"},\"rationale\":\"\"}}\nRules:\n- score is integer 0-10\n- score_label format: \"Strong fit: X/10\" or \"Possible fit: X/10\" or \"Weak fit: X/10\"\n- fit_band one of: STRONG_FIT, POSSIBLE_FIT, WEAK_FIT\n- use evidence from provided context only; do not invent facts\n- default to higher recall unless strict matching is explicitly requested\nInputs:\nICP context: {{icp_context}}\nProspect payload: {{prospect_payload}}",
+  "model": "openai/gpt-5.6-luna"
+}
+```
+
+### 2) Qualification QA + Rationale Template
+
+```json
+{
+  "prompt": "You are an ICP qualification analyst.\nReturn strict JSON only:\n{\"data\":{\"qualification\":{\"answers\":[{\"question\":\"\",\"answer\":\"Yes|No|Unknown\",\"confidence\":\"HIGH|MEDIUM|LOW\",\"rationale\":\"\"}],\"summary\":{\"positives\":[\"\"],\"risks\":[\"\"],\"next_checks\":[\"\"]}},\"rationale\":\"\"}}\nRules:\n- keep answers short and explicit\n- each rationale must reference concrete evidence from context\n- mark Unknown when evidence is missing\n- avoid strict/exact matching unless explicitly asked\nInputs:\nICP questions: {{qualification_questions}}\nICP context: {{icp_context}}\nProspect payload: {{prospect_payload}}",
+  "model": "openai/gpt-5.6-luna"
+}
+```
+
+### 3) 4-Step Email Sequence Design Template
+
+```json
+{
+  "prompt": "You are a B2B email strategist.\nReturn strict JSON only:\n{\"data\":{\"emails\":[{\"step\":1,\"subject\":\"\",\"coreValueProp\":\"\",\"email\":\"\"}],\"sequence_rationale\":\"\"}}\nRules:\n- exactly 4 emails with step 1..4\n- each email must map to a pain or risk from qualification summary\n- concise style, no fluff, no markdown\n- personalization must reference role/company context from prospect payload\n- avoid claims not supported by inputs\nInputs:\nProduct context: {{product_context}}\nQualification output: {{qualification_output}}\nProspect payload: {{prospect_payload}}",
+  "model": "openai/gpt-5.6-luna"
+}
+```
+
+### 4) Subject Line Variant Generator Template
+
+```json
+{
+  "prompt": "You are a B2B subject line writer.\nReturn strict JSON only:\n{\"data\":{\"subjects\":[{\"variant\":\"\",\"angle\":\"pain|outcome|proof|curiosity\",\"why_it_matches\":\"\"}]}}\nRules:\n- create 8 variants max 7 words each\n- no clickbait, no ALL CAPS, no exclamation marks\n- tie each variant to qualification rationale\nInputs:\nQualification output: {{qualification_output}}\nProspect payload: {{prospect_payload}}",
+  "model": "openai/gpt-5.6-luna"
+}
+```
+
+### 5) Email Quality Critique Template (Optional QA Pass)
+
+```json
+{
+  "prompt": "You are a cold email QA editor.\nReturn strict JSON only:\n{\"data\":{\"issues\":[{\"step\":1,\"severity\":\"HIGH|MEDIUM|LOW\",\"issue\":\"\",\"fix\":\"\"}],\"revised_emails\":[{\"step\":1,\"subject\":\"\",\"coreValueProp\":\"\",\"email\":\"\"}]}}\nRules:\n- flag vague claims, unsupported assertions, and weak personalization\n- keep original structure and tighten only where needed\nInputs:\nQualification output: {{qualification_output}}\nEmail sequence output: {{email_sequence_output}}\nProspect payload: {{prospect_payload}}",
+  "model": "openai/gpt-5.6-luna"
+}
+```
+
+## Guardrails
+
+- Keep qualification deterministic and evidence-based from provided context.
+- Prefer high recall unless strict matching is explicitly requested.
+- Keep outputs strict JSON (no markdown wrappers).
+- Keep email copy concise, specific to role/company context, and grounded in qualification rationale.
+
+## CSV Inspection
+
+Use these commands to interact with `deepline csv` directly for inspecting and debugging enrichment results.
+
+### Open an existing CSV
+
+```bash
+deepline csv render --csv leads.csv --open
+```
+
+- Use `--open` to launch the CSV viewer.
+
+### Inspect rows (`deepline csv show`)
+
+Keep the complete export, including intermediate evidence; select columns for
+display with `csv show` instead of changing the exported file. See
+`deepline csv show -h` for options.
+
+- `--format json|table|csv` applies to both row display and summary; JSON is default.
+- `--columns a,b` includes named columns; `--exclude-columns c` omits them.
+  Exclusions win. Unknown names or an empty selection fail; the file is unchanged.
+- `--verbose` shows full cell values in table output, not additional columns.
+- `--summary` returns one row per selected column with present/missing counts,
+  present percentage, unique count, top repeated values and other count. It
+  analyzes all file rows by default; presence is not verification or a miss reason.
+- `--rows start:end` is inclusive. Normal display defaults to `0:19`; an
+  explicit range also limits the summary.
+
+```bash
+deepline csv show leads.csv
+deepline csv show leads.csv --columns first_name,email --format table --rows 0:10
+deepline csv show leads.csv --summary
+```
+
+Use actual column names from the file. CSV JSON display still contains string
+cells. For native nested objects and arrays, use `runs export --format json`
+as described in `deepline runs export --help`.
+
+### Re-run a column
+
+`deepline csv` is local inspection only. Inspect the existing export and run
+before proposing recomputation. A new run or forced refresh needs execution
+authority and may spend again; completed receipt reuse is not a free-rerun
+guarantee. See `deepline run --help` and `deepline runs rerun --help`.
+
+### CLI-only debug posture
+
+- These commands inspect local files; they run nothing. Deterministic
+  processing is allowed; preserve the original and label derived outputs.
+- To add columns or providers, use a prebuilt play from `deepline search` or a custom play.

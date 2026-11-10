@@ -272,3 +272,16 @@ Route expected Workspace failures:
   do not ask the customer for Deepline's Google credentials.
 - Edited expectations or labels: mark the comparison stale and restart against
   the new basis rather than presenting incomparable scores.
+
+## Files to download before use
+
+This copy of the skill comes from the Claude plugin, which ships only Markdown, text, JSON, YAML, and image files. The files listed below are not in the plugin. Before you use one of them, download the full skill into its own folder and set `SKILL_DIR` and `SKILL_ROOT` to that folder in the same shell. Resolve every path in this skill that is relative to the skill directory from `$SKILL_DIR`. Do not download these files into the working directory.
+
+- `scripts/review-sheet-presentation.mjs`
+
+```bash
+export SKILL_DIR="${TMPDIR:-/tmp}/deepline-skills/deepline-plays-review"
+export SKILL_ROOT="$SKILL_DIR"
+mkdir -p "$SKILL_DIR"
+curl -fsSL 'https://code.deepline.com/.well-known/skills/archives/deepline-plays-review.tar.gz' | tar -xzf - -C "$SKILL_DIR"
+```

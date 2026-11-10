@@ -300,3 +300,24 @@ On Yes, run
 `deepline sessions send --current-session --rating <good|poor|neutral>`, rated
 by outcome, then output `Session sent to Deepline. Rating: <rating>`. On No, or
 when the user prohibits external sharing, do not send or ask again.
+
+## Files to download before use
+
+This copy of the skill comes from the Claude plugin, which ships only Markdown, text, JSON, YAML, and image files. The files listed below are not in the plugin. Before you use one of them, download the full skill into its own folder and set `SKILL_DIR` and `SKILL_ROOT` to that folder in the same shell. Resolve every path in this skill that is relative to the skill directory from `$SKILL_DIR`. Do not download these files into the working directory.
+
+- `claude-deepline-statusline.mjs`
+- `scripts/clay-extract-bookmarklet.js`
+- `scripts/clay-extract.py`
+- `scripts/clay-har-miner.py`
+- `scripts/clay-to-deepline.mjs`
+- `scripts/contact-accuracy-audit.py`
+- `scripts/flatten-search-contact-persons.py`
+- `scripts/select-current-role.py`
+- `scripts/validate-emails.py`
+
+```bash
+export SKILL_DIR="${TMPDIR:-/tmp}/deepline-skills/deepline-gtm"
+export SKILL_ROOT="$SKILL_DIR"
+mkdir -p "$SKILL_DIR"
+curl -fsSL 'https://code.deepline.com/.well-known/skills/archives/deepline-gtm.tar.gz' | tar -xzf - -C "$SKILL_DIR"
+```

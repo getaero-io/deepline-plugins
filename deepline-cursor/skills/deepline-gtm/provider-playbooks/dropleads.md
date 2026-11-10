@@ -1,0 +1,92 @@
+<!-- skill-tool-compat: dropleads_email_verifier -- Existing exact-ID calls and Plays remain supported during the documented discovery outage; this guide does not select it for new workflows. -->
+
+<!-- skill-tool-compat: dropleads_mobile_finder -- Existing exact-ID calls and Plays remain supported during the documented discovery outage; this guide does not select it for new workflows. -->
+
+<!-- skill-tool-compat: dropleads_email_finder -- Existing exact-ID calls and Plays remain supported during the documented discovery outage; this guide does not select it for new workflows. -->
+
+<!-- skill-tool-compat: dropleads_search_people -- Existing exact-ID calls and Plays remain supported during the documented discovery outage; this guide does not select it for new workflows. -->
+
+<!-- skill-tool-compat: dropleads_get_lead_count -- Existing exact-ID calls and Plays remain supported during the documented discovery outage; this guide does not select it for new workflows. -->
+
+# Dropleads Playbook
+
+Dropleads is hidden from tool discovery because of upstream reliability issues. Choose another provider for new workflows. Exact calls and existing Plays remain supported; the guidance below applies to those existing integrations.
+
+Use Dropleads as a two-phase flow: low-cost contact discovery first, paid enrichment second. Do not use Dropleads people search as the first step for account discovery.
+
+## 1) Start with low-cost discovery
+
+- Use `dropleads_get_lead_count` to size the audience before any paid call.
+- Use `dropleads_search_people` to inspect masked contacts and validate ICP filters (free).
+- Use `dropleads_search_people` after you already have target account domains, by passing `filters.companyDomains`. It is a contact search primitive, not a dependable way to discover target accounts.
+- Do not build joins or account-discovery flows that depend on every returned lead having `companyDomain`. Treat returned `companyDomain` as optional; if you need account domains as the source of truth, use a company-native search/enrichment tool first.
+- Tighten filters until sample rows clearly match role, industry, and geo expectations.
+- Key filter fields: `filters.jobTitles`, `filters.seniority` (VP/Director/Manager/Senior/Entry/Intern), `filters.industries`, `filters.departments`, `filters.companyDomains`, `filters.employeeRanges`, `filters.personalCountries`, `filters.personalStates`, `filters.personalCities`, `filters.organizationCountries`, `filters.organizationStates`, `filters.organizationCities`, `pagination.page`, `pagination.limit`. Use `personal*` for the contact's location and `organization*` for company HQ; a person's location is not necessarily their employer's HQ. Use title terms like `CEO`, `CTO`, or `Founder` for C-level searches; do not pass `C-Level` as a Dropleads seniority value — Dropleads' own API docs list it, but live validation rejects it. `filters.seniorityExclude` and `filters.departmentsExclude` take the same exact values as their include twins.
+
+### Filter best practices
+
+All Dropleads filters nest under the `filters` object. Pagination nests under `pagination`. The canonical payload shape:
+
+```json
+{
+  "filters": {
+    "companyDomains": ["microsoft.com"],
+    "jobTitles": ["CTO", "VP Engineering"],
+    "seniority": ["VP", "Director"],
+    "personalCountries": { "include": ["United States"] }
+  },
+  "pagination": { "page": 1, "limit": 25 }
+}
+```
+
+**Quick reference — correct filter keys:**
+
+| Filter      | Correct key                                                                                 | Why                                                                                                                                                                                                                                                          |
+| ----------- | ------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Company     | `filters.companyDomains`                                                                    | Exact domain match for known accounts. Prefer this when you already have domains; do not rely on people-search results to discover a complete account-domain list. `companyNames` does fuzzy substring matching — "Microsoft" pulls in unrelated businesses. |
+| Person geo  | `filters.personalCountries`, `filters.personalStates`, `filters.personalCities`             | Filters the contact's location. Each field uses an `{ "include": [...], "exclude": [...] }` object.                                                                                                                                                          |
+| Company geo | `filters.organizationCountries`, `filters.organizationStates`, `filters.organizationCities` | Filters the company HQ, not the contact's location. Each field uses an `{ "include": [...], "exclude": [...] }` object.                                                                                                                                      |
+| Seniority   | `filters.seniority`, `filters.seniorityExclude`                                             | Exact values only: `VP`, `Director`, `Manager`, `Senior`, `Entry`, `Intern`. Use `jobTitles` terms like `CEO`, `CTO`, or `Founder` for C-level searches.                                                                                                     |
+| Department  | `filters.departments`, `filters.departmentsExclude`                                         | Exact values only: `Engineering`, `Sales`, `Marketing`, `Operations`, `Finance`, `HR`, `Product`, `Customer Success`, `Legal`, `IT`.                                                                                                                         |
+| Industry    | `filters.industries`                                                                        | Exact strings from Dropleads. Pilot with a broad search first when unsure.                                                                                                                                                                                   |
+
+### Exclude filters use the same vocabulary as their include twin
+
+`seniorityExclude` and `departmentsExclude` take the exact same values as `seniority` and `departments`. Prime-DB itself silently ignores an unrecognized value in either exclude list: the exclusion you asked for never happens, the call still returns 200, and the result set still shifts because the filter key is present. Deepline rejects unknown values with a 422 instead of letting a wrong answer look like a valid one.
+
+Also note that sending `seniorityExclude` at all drops leads that carry no seniority in Prime-DB, so it narrows results beyond the levels you name. On a `sephora.com` sample: 1514 leads with no seniority filter, 1058 with all six levels included, 94 with all six excluded.
+
+### Geo filters are best-effort, not verified
+
+Dropleads geo filters (`personalCountries` / `personalStates` / `personalCities` and `organizationCountries` / `organizationStates` / `organizationCities`) match against **self-reported, LinkedIn-sourced location text** — they are not verified against the contact's actual location. Treat them accordingly:
+
+- **City-level is the loosest match and leaks.** `personalCities` can return contacts whose stated city loosely matches even when their real location differs, and non-US contacts can appear under a US-city filter (e.g. a Bulgarian contact surfacing under `personalCities: San Francisco` + `personalCountries: United States`). Country/state are more reliable.
+- **Person vs. company location are different fields.** `personal*` filters the contact's own location; `organization*` filters the company HQ. Don't conflate them — filtering a remote employee by company HQ city (or vice versa) drops or leaks legitimate matches.
+- **Verify geo when precision matters.** Combine `personalCountries`/`personalStates` with `personalCities`, then post-filter the returned leads on their `country`/`state`/`city` (and exclude obvious mismatches) before trusting the result or spending on enrichment. Do not assume the filter alone guarantees the geo.
+
+## 2) Escalate paid calls only for shortlisted targets
+
+- Run `dropleads_email_finder` for contacts that passed the discovery pass.
+- Run `dropleads_mobile_finder` only when phone is required for the workflow.
+- For larger or uncertain authorized enrichment, use a small representative pilot and check quality before scaling. Do not add a pilot run or repeat approval for a small supplied Play; inspect its existing results without paid repair.
+
+## 3) Gate outbound with verifier status
+
+- Treat `invalid`, `catch_all`, and `unknown` as non-send by default.
+- Treat `valid` as the only status that passes automatic send gates.
+- Respect `credits_charged` in responses for post-execution billing accuracy.
+
+## 4) Practical sequencing
+
+1. Count segment (`dropleads_get_lead_count`).
+2. Sample segment (`dropleads_search_people`).
+3. Pre-score titles with local JavaScript if looking for a specific profile (e.g. founders, GTM engineers).
+4. Validate work history and signals against data from an authorized source or a user-provided export.
+5. Extract signals with local JavaScript from that data (e.g. founder detection, hiring signals).
+6. Enrich emails via waterfall (`dropleads_email_finder` first, then other providers).
+7. Verify candidate emails (`dropleads_email_verifier` or `leadmagic_email_validation`).
+8. For larger or uncertain work, expand within the authorized scope after the sample quality is confirmed. This sequence is planning guidance, not a requirement to run extra discovery or enrichment when inspecting a supplied Play or its results.
+
+## 5) Account discovery boundary
+
+For account-based pipelines, start with a company-native source that returns account domains as first-class results. Feed those domains into Dropleads via `filters.companyDomains` to find contacts at known accounts. Dropleads may include `companyDomain` on returned people, but it is not guaranteed enough to be the join key that creates the account universe.

@@ -4,6 +4,8 @@
 
 - Plugin packaging is now skills-only. Each shipped `SKILL.md` includes the npm CLI install, auth, and skill refresh commands.
 - Removed the plugin `bin/deepline` bootstrap shim from the assembled Cowork/Claude Code plugin artifact.
+- The Cursor (agent-plugins.org) `plugin.json` and `mcp.json` moved from `deepline/` to a new `deepline-cursor/` folder. If you installed by cloning this repo into `~/.cursor/plugins/local`, point Cursor at `deepline-plugins/deepline-cursor` after you pull, then reload the window.
+- The `deepline/` Claude plugin now ships only Markdown, text, JSON, YAML, and image files. Each skill that has scripts or Play files tells the agent how to download the full skill into its own folder.
 
 ## 1.0.0 — 2026-05-04
 

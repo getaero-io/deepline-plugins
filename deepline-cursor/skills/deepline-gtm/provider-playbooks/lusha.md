@@ -1,0 +1,93 @@
+# Lusha — Agent Guidance
+
+## When to use
+
+Lusha for B2B email + direct dial enrichment. Strong North American and European coverage with intent signal data. Good for sales prospecting workflows where direct dials matter. Cost-competitive per enriched contact.
+
+Connect the workspace's own Lusha API key in Dashboard → Integrations before calling a Lusha tool. Lusha bills the connected account; Deepline does not charge credits for these calls.
+
+**Key strength**: Direct dials (not just HQ numbers). Lusha often surfaces mobile and desk direct numbers that other providers miss.
+
+## Provider characteristics
+
+- **Input required**: LinkedIn URL (best), email, or first_name+last_name+(company_name or company_domain)
+- **Geographic coverage**: Global, strongest in North America + Europe
+- **Cost profile**: billed per person enrich, company enrich, or contact returned from search
+- **LinkedIn URL requirement**: Must contain "linkedin.com/in/". Sales Navigator URLs not supported.
+
+## Key operations
+
+### lusha_enrich_person
+
+Enriches a person by LinkedIn URL (preferred), email, or name+company. Returns emails at `emailAddresses[].email` and phones at `phoneNumbers[].number`.
+
+```json
+{
+  "linkedin_url": "https://www.linkedin.com/in/johndoe"
+}
+```
+
+```json
+{
+  "first_name": "Jane",
+  "last_name": "Smith",
+  "company_domain": "acme.com"
+}
+```
+
+Optional flags:
+
+- `reveal_emails: true` — include email addresses in response (default: true)
+- `reveal_phones: true` — include phone numbers (default: true)
+- `signals: true` — also return promotion and company-change signals under `signals` (1 extra Lusha credit)
+- `include_company_profile: false` — skip the full company profile under `company` (saves 1 Lusha credit per found person; `company` then has only `name`, `fqdn` and `mainIndustry`)
+
+For an email-only lookup, always pass `reveal_phones: false`. Lusha reveals phones by default and charges 5 Lusha credits per revealed phone versus 1 per email, so omitting the flag pays for phones you did not ask for:
+
+```json
+{
+  "linkedin_url": "https://www.linkedin.com/in/johndoe",
+  "reveal_emails": true,
+  "reveal_phones": false
+}
+```
+
+### lusha_enrich_company
+
+Enriches a company from domain, name, or Lusha company ID (`v3Id` / `v3CompanyId` from a current result). Returns size, revenue, industry, technologies.
+
+```json
+{
+  "domain": "salesforce.com"
+}
+```
+
+### lusha_search_contacts
+
+Prospecting search with rich filters: department, seniority, company size, industry, job title, location, and tech stack.
+
+```json
+{
+  "filters": {
+    "seniority": ["director", "vp", "c_suite"],
+    "companySize": ["201-500", "501-1000"],
+    "department": ["sales"]
+  },
+  "pageSize": 25
+}
+```
+
+## Output shape
+
+`lusha_enrich_person` returns a flat profile. Email at `emailAddresses[0].email`, phone at `phoneNumbers[0].number`, title at `jobTitle.title`, company at `company.name`.
+
+`lusha_enrich_company` returns a flat company object with `name`, `domain`, `employees`, `revenueRange`, `mainIndustry`, `technologies[]`.
+
+`lusha_search_contacts` returns `{ contacts: [...], pagination: { page, pageSize, total, totalPages } }`.
+
+## Anti-patterns
+
+- Don't use Sales Navigator or Recruiter LinkedIn URLs — they'll fail
+- Don't include "http://" or "www." in domain values for company enrichment
+- Don't pass `company_name` alone without `first_name` + `last_name` for person lookup — name+company is the minimum combo
+- Don't read a top-level `email` or `phone` — use the `emailAddresses[]` and `phoneNumbers[]` arrays

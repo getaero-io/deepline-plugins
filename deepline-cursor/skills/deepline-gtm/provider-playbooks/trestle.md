@@ -1,0 +1,81 @@
+# Trestle Workflow Guidance
+
+Trestle has two phone APIs:
+
+| Tool                       | Use when                                                                               |
+| -------------------------- | -------------------------------------------------------------------------------------- |
+| `trestle_phone_validation` | You need line type, carrier, activity score. No identity matching needed.              |
+| `trestle_real_contact`     | You need to verify the phone belongs to a specific person (name_match, contact_grade). |
+
+## trestle_phone_validation (Phone Intel API)
+
+**Use as the default validation step after phone enrichment.** It's cheap and tells you:
+
+- `is_valid` — is this a real phone number?
+- `line_type` — Mobile, Landline, FixedVOIP, NonFixedVOIP, etc.
+- `carrier` — service provider name
+- `activity_score` — 0-100, where 70+ is active and 30 or below is stale/disconnected
+- `is_prepaid` — prepaid account status
+
+**When to use:**
+
+- Validation after a phone-enrichment waterfall
+- Before cold calling to filter out disconnected/landline numbers
+- When you don't have or don't care about name matching
+
+**Does NOT require a name.** Just pass the phone number.
+
+Phone Intel returns the line type as `line_type`. The Real Contact API returns
+the same signal in its flat dotted-key response as `phone.linetype`.
+
+## trestle_real_contact (Real Contact API)
+
+**Use when identity verification matters.** Returns everything from Phone Intel plus:
+
+- `phone.name_match` — does the phone belong to this person?
+- `phone.contact_grade` — A (high confidence) through F (drop)
+- Optional email cross-validation in the same call
+
+**When to use:**
+
+- High-value outbound where you need to confirm identity
+- When you have a name + phone and want to verify they belong together
+- When you need email validation bundled with phone validation
+
+**Requires both `phone` and `name`.** Optional: `email` for cross-validation, `business_name` and address fields for identity context, and `litigator_check: true` to flag TCPA litigator risk (`add_ons.litigator_checks.phone_is_litigator_risk`).
+
+## Key signals
+
+- **`activity_score >= 70`** indicates an active line
+- **`activity_score < 30`** is stale/disconnected — auto-fails waterfall validation
+- **`line_type = "Mobile"`** is the outbound-friendly type
+- **`contact_grade A/B`** = safe to call, **D/F** = drop
+
+## Waterfall integration
+
+When used after phone enrichment providers, Trestle validation tools automatically fail the waterfall step if:
+
+- `is_valid` is false (invalid number)
+- `activity_score` is below 30 (stale/disconnected)
+
+This causes the waterfall to continue to the next phone provider, ensuring you only get validated, active phone numbers.
+
+## Billing
+
+- Both endpoints are post-deduct — you only pay on success.
+
+The Real Contact response uses dotted keys at the top level of the result, for
+example `toolResponse.raw["phone.is_valid"]` and
+`toolResponse.raw["phone.activity_score"]` in CLI JSON and Play results
+(`toolResponse.rawV2` is the same object). These keys are literal property
+names; do not try to read them as nested `phone.is_valid` objects. Phone Intel
+fields are also top level, for example `toolResponse.raw.line_type`.
+
+### Output compatibility
+
+Real Contact 2.0 is adapted to the existing literal dotted keys, including
+`phone.linetype`. `phone`, `name`, and optional `email` echo the queried identity;
+they are not newly discovered contact details. Input echoes are added only when
+the corresponding validity flag is true and no provider error is present. Legacy flat fixtures remain valid.
+Explicit null add-ons and provider diagnostics are preserved. Non-object upstream
+responses fail instead of returning an empty validation result.

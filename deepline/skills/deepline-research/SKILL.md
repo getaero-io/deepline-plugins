@@ -340,3 +340,18 @@ If the user approves, execute with `deepline run` on a Deepline Play or a target
 The task is done only when the user has a ranked data-source map, a `last30days`-style GTM research synthesis grounded in public sources, live tool ids or explicit provider gaps, a Deepline-facing cost estimate, and the recommended first workflow/play shape.
 
 **Every materializable dataset must be resolved to an exact artifact**, verified via live search this session, not named from memory (§4.55). List any blockers for credentials, private-data access, or missing provider support.
+
+## Files to download before use
+
+This copy of the skill comes from the Claude plugin, which ships only Markdown, text, JSON, YAML, and image files. The files listed below are not in the plugin. Before you use one of them, download the full skill into its own folder and set `SKILL_DIR` and `SKILL_ROOT` to that folder in the same shell. Resolve every path in this skill that is relative to the skill directory from `$SKILL_DIR`. Do not download these files into the working directory.
+
+- `scripts/evaluate_examples.py`
+- `scripts/evaluate_public_private_corpus.py`
+- `scripts/query_design.py`
+
+```bash
+export SKILL_DIR="${TMPDIR:-/tmp}/deepline-skills/deepline-research"
+export SKILL_ROOT="$SKILL_DIR"
+mkdir -p "$SKILL_DIR"
+curl -fsSL 'https://code.deepline.com/.well-known/skills/archives/deepline-research.tar.gz' | tar -xzf - -C "$SKILL_DIR"
+```

@@ -335,3 +335,25 @@ Use anonymized or customer-approved values in customer-facing follow-up notes. K
 | Enrich and upload to Meta and Google end to end                     | `recipes/enrich-and-upload-facebook-google.md` |
 | Push a list as far as the budget allows                             | `recipes/max-coverage-audience.md`             |
 | Follow the worked ABM example                                       | `recipes/sample-abm-segment-example.md`        |
+
+## Files to download before use
+
+This copy of the skill comes from the Claude plugin, which ships only Markdown, text, JSON, YAML, and image files. The files listed below are not in the plugin. Before you use one of them, download the full skill into its own folder and set `SKILL_DIR` and `SKILL_ROOT` to that folder in the same shell. Resolve every path in this skill that is relative to the skill directory from `$SKILL_DIR`. Do not download these files into the working directory.
+
+- `plays/audit-no-double-hash.play.ts`
+- `plays/build-contactout-hash-pool.play.ts`
+- `plays/build-hash-only-audience.play.ts`
+- `plays/enrich-audience-waterfall.play.ts`
+- `plays/evaluate-leadmagic-personal-email.play.ts`
+- `plays/evaluate-personal-email-provider.play.ts`
+- `plays/report-google-coverage-lift.play.ts`
+- `plays/shared/audience-hash.ts`
+- `plays/upload-facebook-google-hash-only-audience.play.ts`
+- `plays/upload-google-hash-only-audience.play.ts`
+
+```bash
+export SKILL_DIR="${TMPDIR:-/tmp}/deepline-skills/deepline-ads-audiences"
+export SKILL_ROOT="$SKILL_DIR"
+mkdir -p "$SKILL_DIR"
+curl -fsSL 'https://code.deepline.com/.well-known/skills/archives/deepline-ads-audiences.tar.gz' | tar -xzf - -C "$SKILL_DIR"
+```

@@ -86,3 +86,40 @@ V2 returns `signals[]`, `statistics`, `method`, `config_sha256` and `scoring_eli
 Follow [testing and evaluation](references/testing-and-evaluation.md) for the acceptance contract. The executable evaluation suite is delivered separately from this skill change. Keep implementation replay, live enrichment and predictive validation distinct, and report missing prerequisites.
 
 Keep customer rules, cases and receipts outside published skills. Treat [proven signals](references/proven-signals.md) as hypotheses. For optional contacts, use the current GTM workflow and [dedupe](references/dedupe.md)/[prospecting](references/step-7-prospects.md) guidance; the local contact helper only exports a shortlist. Do not infer names from LinkedIn slugs or treat domain matching as email verification.
+
+## Files to download before use
+
+This copy of the skill comes from the Claude plugin, which ships only Markdown, text, JSON, YAML, and image files. The files listed below are not in the plugin. Before you use one of them, download the full skill into its own folder and set `SKILL_DIR` and `SKILL_ROOT` to that folder in the same shell. Resolve every path in this skill that is relative to the skill directory from `$SKILL_DIR`. Do not download these files into the working directory.
+
+- `.gitignore`
+- `package.json`
+- `scripts/analyze_signals_v2.py`
+- `scripts/analyze_signals.py`
+- `scripts/build_feature_matrix.py`
+- `scripts/collect_sources.py`
+- `scripts/dedupe_utils_v2.py`
+- `scripts/dedupe_utils.py`
+- `scripts/find_contacts_v2.py`
+- `scripts/hubspot_accounts.py`
+- `scripts/jev_features.py`
+- `scripts/replay-score.play.ts`
+- `scripts/scorecard/__init__.py`
+- `scripts/scorecard/config.py`
+- `scripts/scorecard/explainer_artifacts.py`
+- `scripts/scorecard/pipeline.py`
+- `scripts/scorecard/report.py`
+- `scripts/scorecard/scorer.py`
+- `scripts/scorecard/specs.py`
+- `scripts/scoring_contract.ts`
+- `scripts/technology_evidence.py`
+- `scripts/tests/contract_check.ts`
+- `scripts/tests/test_jev_features.py`
+- `scripts/tests/test_scorecard.py`
+- `scripts/train_scorecard.py`
+
+```bash
+export SKILL_DIR="${TMPDIR:-/tmp}/deepline-skills/deepline-scoring"
+export SKILL_ROOT="$SKILL_DIR"
+mkdir -p "$SKILL_DIR"
+curl -fsSL 'https://code.deepline.com/.well-known/skills/archives/deepline-scoring.tar.gz' | tar -xzf - -C "$SKILL_DIR"
+```

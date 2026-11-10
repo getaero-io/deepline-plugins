@@ -1,0 +1,12 @@
+{
+  "documents": {
+    "SKILL.md": {
+      "kind": "entrypoint",
+      "title": "Build a TAM List",
+      "tags": [
+        "recipe"
+      ],
+      "providers": []
+    }
+  }
+}

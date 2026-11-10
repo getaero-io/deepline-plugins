@@ -93,3 +93,40 @@ Give each metric its numerator, denominator, population, time window, source, an
 | `evaluate-crm-cleaning`          | Grade frozen cases or validate receipts                            |
 
 These TypeScript Plays return datasets and fixed counts. Inspect failed rows before claiming completion. The two matching Plays use exact and corroborated fast paths, then metered Jev evaluation for ambiguous candidates. Candidate filtering and call budgets bound model work; see the dedupe job for the evidence policy. They do not perform live merges, paid enrichment, record-creation enforcement, scheduled monitoring, or parent discovery. Those jobs require the selected recipe, verified capabilities, and the safety rule above.
+
+## Files to download before use
+
+This copy of the skill comes from the Claude plugin, which ships only Markdown, text, JSON, YAML, and image files. The files listed below are not in the plugin. Before you use one of them, download the full skill into its own folder and set `SKILL_DIR` and `SKILL_ROOT` to that folder in the same shell. Resolve every path in this skill that is relative to the skill directory from `$SKILL_DIR`. Do not download these files into the working directory.
+
+- `plays/audit-crm-snapshot.play.ts`
+- `plays/bun.lock`
+- `plays/classify-company-domains.play.ts`
+- `plays/collect-domain-evidence.play.ts`
+- `plays/collect-hubspot-companies.play.ts`
+- `plays/evaluate-crm-cleaning.play.ts`
+- `plays/package.json`
+- `plays/plan-crm-domain-repairs.play.ts`
+- `plays/resolve-crm-contact-duplicates.play.ts`
+- `plays/sample-hubspot-crm.play.ts`
+- `plays/score-crm-company-candidates.play.ts`
+- `plays/shared/audit.ts`
+- `plays/shared/collect-domains.ts`
+- `plays/shared/company-candidates.ts`
+- `plays/shared/domain-policy.ts`
+- `plays/shared/domain-repairs.ts`
+- `plays/shared/domain.ts`
+- `plays/shared/duplicates.ts`
+- `plays/shared/evaluate.ts`
+- `plays/shared/hubspot.ts`
+- `plays/shared/identity-evaluation.ts`
+- `plays/shared/io.ts`
+- `plays/shared/json.ts`
+- `plays/shared/native.ts`
+- `plays/shared/time.ts`
+
+```bash
+export SKILL_DIR="${TMPDIR:-/tmp}/deepline-skills/deepline-crm-cleaning"
+export SKILL_ROOT="$SKILL_DIR"
+mkdir -p "$SKILL_DIR"
+curl -fsSL 'https://code.deepline.com/.well-known/skills/archives/deepline-crm-cleaning.tar.gz' | tar -xzf - -C "$SKILL_DIR"
+```
