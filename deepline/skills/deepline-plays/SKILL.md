@@ -1,7 +1,5 @@
 ---
 name: deepline-plays
-# Retired: kept as an alias, left out of deepline search.
-stub: true
 description: 'Deprecated alias. Play work is now part of `deepline-gtm`, and the CLI documents plays itself. Use when a user or script still invokes `/deepline-plays`: immediately load and follow the `deepline-gtm` skill instead. Triggers: play, plays, workflow, waterfall, webhook, cron.'
 ---
 

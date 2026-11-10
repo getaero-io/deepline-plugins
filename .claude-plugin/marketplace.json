@@ -9,7 +9,7 @@
     {
       "name": "deepline",
       "description": "Prospect, enrich, research accounts, and run GTM workflows from Claude with Deepline. Each skill includes Deepline CLI install and auth setup.",
-      "version": "1.1.901",
+      "version": "1.1.902",
       "source": "./deepline",
       "category": "productivity",
       "keywords": [
