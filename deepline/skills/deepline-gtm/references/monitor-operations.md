@@ -102,8 +102,7 @@ The contract for a type gives you everything you need to deploy and to filter:
 - **pricing** — live Deepline price, charge timing, and pricing basis.
 - **a deploy example** — `deepline monitors deploy '<def>'`.
 
-A monitor type is deployed, not executed: `deepline tools execute <monitor-type>`
-is rejected and points you at `deepline monitors deploy`.
+A monitor type is deployed with `deepline monitors deploy`, never run.
 
 ## Command set
 
@@ -112,12 +111,11 @@ Use `deepline describe <tool-id>` without `--json` for discovery.
 
 | Command                                                   | Purpose                                                                                                             |
 | --------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------- |
-| `monitors status`                                         | Check beta access first.                                                                                            |
 | `tools list --categories monitors` / `describe <tool-id>` | Discover live payload fields, streams and prices.                                                                   |
-| `monitors available [tool-id]`                            | Legacy alias for tool discovery.                                                                                    |
 | `monitors check '<definition>'`                           | Validate without deployment or spend.                                                                               |
+| `monitors preview '<definition>'`                         | Paid sample of recent matches, only where `check` returns `preview.available: true`; creates nothing.               |
 | `monitors deploy '<definition>'`                          | Apply a full desired definition; `--dry-run` previews validity, price and reuse.                                    |
-| `monitors list`                                           | Page the registry with `--status active\|inactive\|all`, `--limit` and `--cursor`.                                  |
+| `monitors list`                                           | Page the registry with `--state` (`active` by default, or `all`), `--limit` and `--cursor`.                         |
 | `monitors get <key>`                                      | Read stored definition, current binding and `monitor_spec`.                                                         |
 | `monitors test <key> '<payload>'`                         | Validate callback shape without rows, charges or Play dispatch.                                                     |
 | `monitors validate <key>`                                 | Validate provider configuration; does not prove delivery.                                                           |
@@ -136,6 +134,41 @@ commands accept positional JSON or `--file <path>` / `--file -`. When listing,
 read `total`, `returned`, `has_more` and `next_cursor`; continue while `has_more`
 is true. `--include-consumers` is limited to 20 rows. A top-up alone does not
 recreate deleted Fleet resources.
+
+## Preview samples
+
+`monitors preview` returns up to three recent `updates` now and creates nothing.
+Each returned match costs the per-match price; an empty preview is free and does
+not prove zero matches. Keep each preview's key and `updates`: they are the
+sample for the rest of setup, because a preview stores no rows. Deploy the
+approved definition, without `--limit`, at the destination step.
+
+To send a preview through the action, run the Play once per update that passes
+the listener's `where` conditions, which you apply yourself:
+
+```json
+{
+  "tool": "<monitor tool>",
+  "stream": "<stream>",
+  "operation": "INSERT",
+  "before": null,
+  "after": {
+    "domain": "<update.data.domain>",
+    "discovered_at": "<update.discovered_at>",
+    "<each update.content field that is a column of the stream>": "..."
+  },
+  "changedAt": "<update.discovered_at>",
+  "metadata": {
+    "outboxId": "sample:<preview key>:<update index>",
+    "listenerId": "sample",
+    "table": "<schema.table>"
+  }
+}
+```
+
+These events lack `event_id`, `record_id`, `radar_id` and every `_dl_*` column. If
+the Play reads one of them, say the sample can't exercise that step; don't invent
+a value.
 
 ## Billing pause: current safe operator path
 
@@ -203,10 +236,9 @@ one shape. See "Monitors as code (SDK)".
 Use `controls.execution_type: "priority"` only for an urgent preview or
 calibration, such as the setup sample radar, and never for the targets turned on
 after it. Deepline adds the provider-facing marker; do not put
-`custom_fields` in `payload`. Regular and bulk creation stay normal. An org has
-ten active-or-in-flight priority slots. At the cap, report it and get the
-user's choice; never delete a customer radar automatically. To retain a radar
-but release its slot, patch `{"controls":{"execution_type":null}}`.
+`custom_fields` in `payload`. Regular and bulk creation stay normal. To keep a
+stopped radar but return it to regular execution, patch
+`{"controls":{"execution_type":null}}`.
 
 ```json
 {

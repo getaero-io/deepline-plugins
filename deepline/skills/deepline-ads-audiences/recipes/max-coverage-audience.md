@@ -88,7 +88,7 @@ Use cleaned account/company aliases and validate identity before merging:
 Accept a candidate only when:
 
 - URL is `linkedin.com/in/`;
-- first and last name match, allowing common nicknames;
+- first and last names are compatible: accept exact names, filter unrelated family names, then use Jev through `ai_evaluate` to judge nicknames, initials, spelling variants and credentials against the supplied profile evidence, and retain its probability; require independent employer or other identity corroboration for non-exact names;
 - company/title evidence supports the match;
 - ambiguous results are profile-scraped and revalidated before merge.
 
@@ -210,12 +210,12 @@ Do not overwrite variants during experimentation. Separate audiences are require
 
 ### L7: Platform Readback
 
-After upload, poll platform status:
+After upload, poll platform status. Google's match rate is at `data.audience.match_rate_percentage`:
 
 ```bash
-deepline tools execute google_ads_audiences_get_audience_status --payload '{"account_id":"<google_customer_id>","audience_id":"<audience_id>"}'
-deepline tools execute meta_audiences_get_audience_status --payload '{"ad_account_id":"act_<meta_ad_account_id>","audience_id":"<audience_id>"}'
-deepline tools execute linkedin_ads_audiences_get_audience_status --payload '{"account_id":"<linkedin_account_id>","audience_id":"<audience_id>"}'
+deepline run google_ads_audiences_get_audience_status --input '{"account_id":"<google_customer_id>","audience_id":"<audience_id>"}'
+deepline run meta_audiences_get_audience_status --input '{"ad_account_id":"act_<meta_ad_account_id>","audience_id":"<audience_id>"}'
+deepline run linkedin_ads_audiences_get_audience_status --input '{"account_id":"<linkedin_account_id>","audience_id":"<audience_id>"}'
 ```
 
 Do not claim success from upload receipt alone. Success requires create, sync, and readback.

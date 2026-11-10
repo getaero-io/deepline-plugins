@@ -1,5 +1,8 @@
 # Clay Action → Deepline Tool Mappings
 
+<!-- skill-tool-compat: run_javascript -- Supported local runtime tool retained in explicitly historical payload examples; author new deterministic transforms as native Play callbacks. -->
+<!-- skill-tool-field: clay_record -- Reserved column alias for the extracted Clay record, not a provider tool. -->
+
 Every Clay action maps to a specific Deepline CLI tool or native play. Use actual tool IDs in every generated script — never generic descriptions.
 
 ## Legacy payload reference — not runnable Play syntax
@@ -9,8 +12,8 @@ historical payloads, prompts, field paths, provider order, and validation
 semantics. They are **not** current callback-based Play examples. Do not paste
 them into a Play.
 Translate a selected recipe using `deepline plays --help`:
-`withColumn(alias, async (row, rowCtx) => ...)`, `rowCtx.tools.execute` with
-stable `id`, `tool`, typed `input`, and `description`, or `rowCtx.runPlay` for a
+`withColumn(alias, async (row) => ...)`, `deepline.tools.execute` with
+stable `id`, `tool`, typed `input`, and `description`, or `deepline.runPlay` for a
 prebuilt. Replace brace interpolation with typed row reads and use declared
 getters rather than assuming historical `.output.body` wrappers still exist.
 
@@ -50,9 +53,9 @@ deepline describe <candidate_tool_id> # verify it exists + see payload schema
 | Clay model                       | Deepline column params                  | Notes                                            |
 | -------------------------------- | --------------------------------------- | ------------------------------------------------ |
 | `gpt-4.1`, `claude` (clay-argon) | `"model":"anthropic/claude-sonnet-4.6"` | Complex reasoning, larger structured outputs     |
-| `gpt-4.1-mini`                   | `"model":"openai/gpt-5.4-mini"`         | Clay's mid-tier model for claygent-style columns |
-| `gpt-4o-mini`, `gpt-5-mini`      | `"model":"openai/gpt-5.4-mini"`         | Fast classify/generate                           |
-| `gpt-5-nano`                     | `"model":"openai/gpt-5.4-mini"`         | Cheapest tier approximation                      |
+| `gpt-4.1-mini`                   | `"model":"openai/gpt-5.6-luna"`         | Clay's mid-tier model for claygent-style columns |
+| `gpt-4o-mini`, `gpt-5-mini`      | `"model":"openai/gpt-5.6-luna"`         | Fast classify/generate                           |
+| `gpt-5-nano`                     | `"model":"openai/gpt-5.6-luna"`         | Cheapest tier approximation                      |
 
 ---
 
@@ -241,7 +244,7 @@ Clay's Mixrank source fetches a pre-built list from a configured Mixrank query. 
 ### Pass 1 — Generate company list (`crustdata_v3_company_search`)
 
 ```python
-import json, subprocess, csv
+import csv, io, json, subprocess
 
 # CrustData filter payload — translate from Clay's Mixrank source config
 # Check the Clay table config or ask the user for the original filter criteria
@@ -258,41 +261,47 @@ payload = {
     "limit": 100,
 }
 
+payload["fields"] = ["basic_info", "locations"]  # response groups to return
+
+columns = ["basic_info.name", "basic_info.primary_domain",
+           "basic_info.professional_network_url", "basic_info.employee_count_range",
+           "locations.headquarters", "locations.country"]
 result = subprocess.run(
-    ["deepline", "tools", "execute", "crustdata_v3_company_search",
-     "--payload", json.dumps(payload), "--json"],
-    capture_output=True, text=True
+    ["deepline", "run", "crustdata_v3_company_search",
+     "--input", json.dumps(payload),
+     "--fields", ",".join("companies." + c for c in columns),
+     "--csv-out", "-"],
+    capture_output=True, text=True, check=True
 )
-response_json = json.loads(result.stdout)
-accounts = response_json.get("result", {}).get("data", [])
-# Fields vary by CrustData result shape; preserve company name, domain,
-# LinkedIn URL, HQ, employee count, funding, and category fields when present.
+accounts = list(csv.DictReader(io.StringIO(result.stdout)))
+# Each row: accounts[0]["basic_info.name"], accounts[0]["basic_info.primary_domain"], ...
 ```
 
 **CrustData output → Clay field mapping:**
 
-| CrustData field                  | Clay formula field                                      |
-| -------------------------------- | ------------------------------------------------------- |
-| `company_name` / `name`          | Name                                                    |
-| `domain` / `company_domain`      | Domain                                                  |
-| `linkedin_url`                   | LinkedIn URL                                            |
-| `hq_location` / `city` + `state` | Location                                                |
-| `organization_country`           | Country                                                 |
-| —                                | Size, Description, Primary Industry, Type (need Pass 2) |
+| CrustData row path                    | Clay formula field                                |
+| ------------------------------------- | ------------------------------------------------- |
+| `basic_info.name`                     | Name                                              |
+| `basic_info.primary_domain`           | Domain                                            |
+| `basic_info.professional_network_url` | LinkedIn URL                                      |
+| `basic_info.employee_count_range`     | Size                                              |
+| `locations.headquarters`              | Location                                          |
+| `locations.country`                   | Country                                           |
+| —                                     | Description, Primary Industry, Type (need Pass 2) |
 
 ### Pass 2 — Enrich missing fields (`prospeo_enrich_company`, optional)
 
-Only needed if downstream passes reference `Description`, `Primary Industry`, `Size`, or `Type`.
+Only needed if downstream passes reference `Description`, `Primary Industry`, or `Type`.
 
 ```python
 # For each company from Pass 1 that lacks description/industry:
 result = subprocess.run(
-    ["deepline", "tools", "execute", "prospeo_enrich_company",
-     "--payload", json.dumps({"website": domain}), "--json"],
-    capture_output=True, text=True
+    ["deepline", "run", "prospeo_enrich_company",
+     "--input", json.dumps({"website": domain}), "--json-out", "-"],
+    capture_output=True, text=True, check=True
 )
-enriched = json.loads(result.stdout).get("result", {}).get("company", {})
-# Fields: description, employee_count, employee_range (= Size), industry categories, company_type
+enriched = json.loads(result.stdout).get("company", {})
+# Fields: description, employee_count, employee_range (= Size), industry, type
 ```
 
 ### Cost comparison
@@ -306,7 +315,7 @@ enriched = json.loads(result.stdout).get("result", {}).get("company", {})
 
 1. What filters did the Clay Mixrank source use? (location, size, industry, tech stack) — visible in the Clay source config or ask the user
 2. How many companies total? Use a narrow pilot or count-like query before paging.
-3. Does the pipeline actually use `Description`, `Industry`, `Size`, `Type`? If not, skip Pass 2.
+3. Does the pipeline actually use `Description`, `Industry`, `Type`? If not, skip Pass 2.
 
 ---
 
@@ -317,7 +326,7 @@ enriched = json.loads(result.stdout).get("result", {}).get("company", {})
 For LLM-quality normalization:
 
 ```ts
-.withColumn('normalized_company', 'deeplineagent', { model: "openai/gpt-5.4-mini", prompt: "Normalize this company name: {{company_raw}}. Strip legal suffixes (Inc, LLC, Corp, Ltd, Holdings, Group). Return title case. Return ONLY the name, nothing else." })
+.withColumn('normalized_company', 'deeplineagent', { model: "openai/gpt-5.6-luna", prompt: "Normalize this company name: {{company_raw}}. Strip legal suffixes (Inc, LLC, Corp, Ltd, Holdings, Group). Return title case. Return ONLY the name, nothing else." })
 
 ```
 
@@ -341,7 +350,7 @@ return name
 ### `chat-gpt-schema-mapper`
 
 ```ts
-.withColumn('job_function', 'deeplineagent', { model: "openai/gpt-5.4-mini", prompt: "Classify this job title into a function label. Rules: all lowercase except BizOps/RevOps/GTM Ops, <4 words, describe the vertical. Return ONLY the label.\n\nJob title: {{job_title}}" })
+.withColumn('job_function', 'deeplineagent', { model: "openai/gpt-5.6-luna", prompt: "Classify this job title into a function label. Rules: all lowercase except BizOps/RevOps/GTM Ops, <4 words, describe the vertical. Return ONLY the label.\n\nJob title: {{job_title}}" })
 
 ```
 
@@ -355,7 +364,7 @@ No `jsonSchema` needed for a single-value string output.
 
 ```ts
 // fast reasoning / generation
-.withColumn('data_warehouse_formatted', 'deeplineagent', { model: "openai/gpt-5.4-mini", prompt: "<exact Clay prompt with {{field}} refs translated>" })
+.withColumn('data_warehouse_formatted', 'deeplineagent', { model: "openai/gpt-5.6-luna", prompt: "<exact Clay prompt with {{field}} refs translated>" })
 
 
 // larger structured output
@@ -376,7 +385,7 @@ Reference structured output fields in downstream passes as `{{col_name.field}}`.
 **Pass 1 — Research:**
 
 ```ts
-.withColumn('company_research', 'deeplineagent', { model: "openai/gpt-5.4-mini", prompt: "Use the research context to summarize {{company_domain}} ({{company_name}}). Return JSON with summary, initiatives, and sources.", jsonSchema: { type: "object", properties: { summary: { type: "string" }, initiatives: { type: "string" }, sources: { type: "string" } }, required: ["summary", "initiatives"], additionalProperties: false } })
+.withColumn('company_research', 'deeplineagent', { model: "openai/gpt-5.6-luna", prompt: "Use the research context to summarize {{company_domain}} ({{company_name}}). Return JSON with summary, initiatives, and sources.", jsonSchema: { type: "object", properties: { summary: { type: "string" }, initiatives: { type: "string" }, sources: { type: "string" } }, required: ["summary", "initiatives"], additionalProperties: false } })
 
 ```
 
@@ -428,7 +437,7 @@ Two passes:
 **Pass 1 — Gather signals (separate enrich call):**
 
 ```ts
-.withColumn('sequence_signals', 'deeplineagent', { model: "openai/gpt-5.4-mini", prompt: "Summarize outbound signals for {{first_name}} ({{title}} at {{company_name}}). Use context: {{qualify_person}} / {{strategic_initiatives}} / {{tension_mapping}}. Return key talking points and pain hypotheses." })
+.withColumn('sequence_signals', 'deeplineagent', { model: "openai/gpt-5.6-luna", prompt: "Summarize outbound signals for {{first_name}} ({{title}} at {{company_name}}). Use context: {{qualify_person}} / {{strategic_initiatives}} / {{tension_mapping}}. Return key talking points and pain hypotheses." })
 
 ```
 
@@ -484,24 +493,26 @@ Clay ships 27 HubSpot actions plus a Salesforce package, and this file does not 
 
 ### `add-lead-to-campaign` (Smartlead)
 
-Use `smartlead_push_to_campaign`:
+Use `smartlead_push_to_campaign`. A single CLI push takes literal values for one
+lead; check it with `--dry-run`, then run the same command
+without it once the user approves the write:
 
 ```bash
-deepline tools execute smartlead_push_to_campaign --payload '{
-  "campaign_id": "<campaign_id>",
+deepline run smartlead_push_to_campaign --dry-run --input '{
+  "campaign_id": "12345",
   "lead_list": [
     {
-      "email": "{{final_email}}",
-      "first_name": "{{first_name}}",
-      "last_name": "{{last_name}}",
-      "company_name": "{{company_name}}",
-      "linkedin_profile": "{{linkedin_url}}"
+      "email": "ada@example.com",
+      "first_name": "Ada",
+      "last_name": "Lovelace",
+      "company_name": "Example Co",
+      "linkedin_profile": "https://www.linkedin.com/in/ada-lovelace-example"
     }
   ]
 }'
 ```
 
-Or as a play column:
+Per-row pushes belong in a play column, which reads each row's values:
 
 ```ts
 .withColumn('campaign_push', 'smartlead_push_to_campaign', { campaign_id: '<campaign_id>', lead_list: [{ email: '{{final_email}}', first_name: '{{first_name}}', last_name: '{{last_name}}', company_name: '{{company_name}}' }] })
@@ -510,12 +521,14 @@ Or as a play column:
 
 ### `add-lead-to-campaign` (Instantly)
 
-Use `instantly_add_to_campaign`:
+Use `instantly_add_to_campaign`. As with Smartlead, check a single literal lead
+with `--dry-run` first, run it for real only after the user approves the write,
+and put per-row pushes in a play column:
 
 ```bash
-deepline tools execute instantly_add_to_campaign --payload '{
-  "campaign_id": "<campaign_id>",
-  "leads": [{"email": "{{final_email}}", "first_name": "{{first_name}}", "last_name": "{{last_name}}", "company_name": "{{company_name}}"}]
+deepline run instantly_add_to_campaign --dry-run --input '{
+  "campaign_id": "8f3c2a1e-5b7d-4e9a-9c1f-2d6e8a4b7c30",
+  "leads": [{"email": "ada@example.com", "first_name": "Ada", "last_name": "Lovelace", "company_name": "Example Co"}]
 }'
 ```
 

@@ -1,3 +1,7 @@
+<!-- skill-tool-compat: parallel_fetch_mcp -- Supported hidden exact-name action for explicitly requested one-off exploration; excluded from Plays and scale loops. -->
+
+<!-- skill-tool-compat: parallel_search_mcp -- Supported hidden exact-name action for explicitly requested one-off exploration; excluded from Plays and scale loops. -->
+
 Use Parallel for managed research/extraction runs without custom orchestration.
 
 - Use `parallel_run_task`, `parallel_search`, and `parallel_extract` for agent-friendly workflows.
@@ -10,36 +14,35 @@ Use Parallel for managed research/extraction runs without custom orchestration.
 - Use `parallel_run_task` when you need synthesized, schema-shaped outputs from multiple sources.
 - Call `parallel_run_task` first. If it finishes quickly, use that result.
 - If `parallel_run_task` returns pending or times out, keep the `run_id` and use `parallel_get_task_run_result` later to fetch the final output.
-- Ignore `parallel_get_task_run` unless you specifically need run metadata like status timestamps or processor info.
 - Keep monitor/stream endpoints out of default flows unless a user explicitly needs them.
 - For larger or uncertain authorized research, pilot on a small objective before widening `max_results` and scope. Do not add a pilot or repeat approval for a small supplied Play. Inspect existing task results by `run_id`; inspection does not authorize a new paid research run or repair. The REST-only policy for Plays and scale still applies.
 - For a direct exploratory MCP call, pass a stable `session_id` across related calls when possible to reduce anonymous-tier throttling. A session id does not make MCP suitable for scale.
 
 ```bash
-deepline tools execute parallel_search --payload '{"mode":"agentic","objective":"Find recent hiring and launch signals for OpenAI","max_results":5,"excerpts":{"max_chars_per_result":1200,"max_chars_total":10000}}'
+deepline run parallel_search --input '{"mode":"agentic","objective":"Find recent hiring and launch signals for OpenAI","max_results":5,"excerpts":{"max_chars_per_result":1200,"max_chars_total":10000}}'
 ```
 
 ```bash
-deepline tools execute parallel_search_mcp --payload '{"objective":"Find recent OpenAI product announcements","search_queries":["OpenAI recent announcements","site:openai.com/news OpenAI product"],"session_id":"demo-session"}'
+deepline run parallel_search_mcp --input '{"objective":"Find recent OpenAI product announcements","search_queries":["OpenAI recent announcements","site:openai.com/news OpenAI product"],"session_id":"demo-session"}'
 ```
 
 ```bash
-deepline tools execute parallel_extract --payload '{"urls":["https://openai.com/research/index/release/"],"objective":"Extract key product launch signal, release summary, and source evidence","full_content":true}'
+deepline run parallel_extract --input '{"urls":["https://openai.com/research/index/release/"],"objective":"Extract key product launch signal, release summary, and source evidence","full_content":true}'
 ```
 
 ```bash
-deepline tools execute parallel_fetch_mcp --payload '{"urls":["https://openai.com/news"],"objective":"Extract the latest product announcement headlines","search_queries":["OpenAI latest product announcements"],"session_id":"demo-session"}'
+deepline run parallel_fetch_mcp --input '{"urls":["https://openai.com/news"],"objective":"Extract the latest product announcement headlines","search_queries":["OpenAI latest product announcements"],"session_id":"demo-session"}'
 ```
 
 ```bash
-deepline tools execute parallel_run_task --payload '{"processor":"lite-fast","input":"Summarize key GTM signals for OpenAI from recent public web sources in 3 bullets."}'
+deepline run parallel_run_task --input '{"processor":"lite-fast","input":"Summarize key GTM signals for OpenAI from recent public web sources in 3 bullets."}'
 ```
 
 ```bash
-deepline tools execute parallel_get_task_run_result --payload '{"run_id":"trun_123"}'
+deepline run parallel_get_task_run_result --input '{"run_id":"trun_123"}'
 ```
 
 ```bash
-deepline tools execute parallel_search --payload '{"objective":"Find AI companies that raised Series A funding in 2024 with source links","max_results":10}'
-deepline tools execute parallel_extract --payload '{"urls":["https://techcrunch.com/2024/12/20/heres-the-full-list-of-49-us-ai-startups-that-have-raised-100m-or-more-in-2024/"],"objective":"Extract company name, funding round, amount, date, and source evidence","excerpts":true}'
+deepline run parallel_search --input '{"objective":"Find AI companies that raised Series A funding in 2024 with source links","max_results":10}'
+deepline run parallel_extract --input '{"urls":["https://techcrunch.com/2024/12/20/heres-the-full-list-of-49-us-ai-startups-that-have-raised-100m-or-more-in-2024/"],"objective":"Extract company name, funding round, amount, date, and source evidence","excerpts":true}'
 ```

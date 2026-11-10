@@ -1,12 +1,13 @@
 ---
 name: deepline-monitors
-description: 'ACCESS-GATED beta. Deepline Monitors are provider event feeds (job posts, email replies, funding, intent) that stream into your warehouse and trigger plays. Only use if you have monitor access: run `deepline monitors status` first; if it reports no access, do NOT use this recipe — tell the user to contact the Deepline team.'
+description: 'Deepline Monitors are provider event feeds (job posts, email replies, funding, intent) that stream into your warehouse and trigger plays.'
 ---
 
 # Deepline Monitors
 
-Monitors are **access-gated Deepline-native signal feeds**. The customer launch
-includes Company Radar and Contact Radar. A monitor provisions a Deepline-managed
+Monitors are **Deepline-native signal feeds**. The customer launch
+includes Company Radar, Contact Radar and Industry Radar (see
+[Industry radars](#industry-radars)). A monitor provisions a Deepline-managed
 feed; events land in a Customer DB table. There is **no run to kick off** — it
 streams as events arrive.
 
@@ -37,8 +38,8 @@ For calibration, follow the artifact with one concrete recommendation and one
 question: `Want me to use that, or adjust it?` This applies even when the call is
 to leave the filter broad: the user explicitly asked to calibrate. During setup,
 a noisy sample uses the improve card in “Sample-first setup” instead. For no
-access, no sample, failure, or stop, state that outcome directly; do not invent
-a scope or results table.
+sample, failure, or stop, state that outcome directly; do not invent a scope or
+results table.
 
 ## Read the deployed monitor spec first
 
@@ -78,7 +79,7 @@ this order (copy in “Sample-first setup”):
 1. **Sample.** Ask to pull a small sample so that we can confirm it looks
    correct. The sample covers **one target per signal type**, not every
    target: pick the target most likely to produce a match for that signal (the
-   largest or most reviewed company). Two signal types, such as reviews and
+   largest or most active company). Two signal types, such as job openings and
    social posts, need two samples. Name no company in the card: approval covers
    the sample deployment, the volume-based loop below, and moving on to the next
    most likely target when one comes back empty, without asking again, until
@@ -95,12 +96,24 @@ Never show history dates, windows, polling or replacement mechanics to the user.
 History is a best-effort sample; say so only when it affects expectations.
 Carry each approval through its step; ask again only if scope, price, action or
 side effects exceed it. If history is unsupported, say a sample is unavailable
-and start at the destination card. Honor an explicit future-only or
-preview-only request without the sample card.
+and start at the destination card. Treat company reviews (`company_reviews`)
+and industry new companies (`industry_new_companies`) the same way: their
+history can take hours to arrive, so never offer or try a sample, and deploy
+them without `updates_since` or priority. Honor an explicit future-only or validate-only
+(no charge) request without the sample card.
+
+**Sample with a preview when check offers one.** When `monitors check` returns
+`preview.available: true`, sample with `monitors preview` instead of deploying
+with history; see
+[preview samples](../references/monitor-operations.md#preview-samples). The
+Sample card covers up to three previews per signal type, each at most
+`preview.max_credits`. Otherwise sample through deployment; never deploy a
+throwaway monitor to imitate a preview.
+Preview before Sample card approval only if the user asked to see matches.
 
 Choose each signal type's first window from the volume you expect for **that
 signal** at the sample target, not from the company alone: a well-known brand
-can be mentioned daily and reviewed a few times a year. Judge it from company
+can be mentioned daily and promote staff a few times a year. Judge it from company
 size, the brand's prominence for that signal, filter breadth and rows already in
 the shared stream; when unsure, use moderate.
 
@@ -108,8 +121,8 @@ the shared stream; when unsure, use moderate.
 | --------------- | -------------------------------------------------------------------------------- | -------- | -------------------- | --------------- |
 | Very high       | likes and comments on a well-known brand's posts; mentions of a well-known brand | 1 day    | 7 days               | 3 minutes       |
 | High            | mentions of a mid-size company; job openings at a large company                  | 3 days   | 7 → 30 days          | 3 minutes       |
-| Moderate        | reviews of a well-known product; filtered roles at mid-size companies            | 30 days  | 180 → 365 → 730 days | 2 minutes       |
-| Sparse          | executive hires, funding, a niche product's reviews, small companies             | 180 days | 365 → 730 days       | 2 minutes       |
+| Moderate        | promotions at a large company; filtered roles at mid-size companies              | 30 days  | 180 → 365 → 730 days | 2 minutes       |
+| Sparse          | executive hires, funding, small companies                                        | 180 days | 365 → 730 days       | 2 minutes       |
 
 Busy signals stop at 7 or 30 days: one that finds nothing in that window most
 likely has no coverage, and a longer pull is where an unexpected bill comes from.
@@ -154,7 +167,7 @@ setup, before asking anything else. Its stored rows remain.
 1. Stop it with `deepline monitors stop <key>`. The stop returns a Monitor Job;
    wait for it with `deepline monitors jobs wait <job id>`.
 2. Confirm `deepline monitors get <key>` reads `inactive`.
-3. Release its priority slot, which a stopped monitor still holds:
+3. Remove its priority, so a later restart runs at regular execution:
 
 ```bash
 deepline monitors update <key> '{"controls":{"execution_type":null}}'
@@ -198,9 +211,9 @@ the chosen step as a Play with a `sqlListeners` trigger on the monitor's stream
 and publish it **before** starting the sample monitor or deploying the other
 targets: a listener fires only for rows written after it exists. Start the
 stopped sample monitor with `deepline monitors start <key>`, which restarts it
-at regular execution because its priority was released, and deploy the other
+at regular execution because its priority was removed, and deploy the other
 targets without `updates_since` or `controls.execution_type`; the sample already
-supplied the history. If
+supplied the history. After a preview, deploy that target like the others. If
 none is connected, say so and ask the user to connect Slack, a CRM or a
 sequencer in Dashboard → Integrations before turning it on. Never present the
 raw Customer DB table as the destination; it is only the fallback when the user
@@ -215,7 +228,7 @@ After the user approves, run the published Play once per eligible row with the
 event it would have received:
 
 ```bash
-deepline plays run <play> --input @sample-event.json
+deepline run <play> --input-file sample-event.json
 ```
 
 ```json
@@ -233,6 +246,9 @@ deepline plays run <play> --input @sample-event.json
   }
 }
 ```
+
+After a preview, build these events from its updates instead; see
+[preview samples](../references/monitor-operations.md#preview-samples).
 
 Run each sample row exactly once: a manual run is not deduplicated, so a second
 run repeats the action. Read the run back and confirm the action happened (the
@@ -295,21 +311,13 @@ Put the recommended configuration and live Deepline credit impact in one short
 approval question. The validated dry-run explains scope and price; explicit
 confirmation authorizes the paid mutation.
 
-## Step 0 — access gate (do this first)
+## Industry radars
 
-Monitors are an access-gated beta. Before any monitor command, confirm access:
-
-```bash
-deepline monitors status
-```
-
-- **You have access** → proceed.
-- **No access** → stop. Do not run other monitor commands; tell the user to
-  contact the Deepline team to request access.
-
-It exits 0 with access and 1 without, with a reason; branch on that.
-Other failures need diagnosis, not reinterpretation as rollout
-denial.
+`deepline_native.industry_radar` watches an industry (a keyword, a role, or every
+new funding round or company) instead of named accounts. Before setting one up,
+read [industry radars](../references/industry-radars.md): which types take a
+keyword, which are global feeds, and how the sample and destination steps
+change.
 
 ## Explain the monitor only when useful
 
@@ -406,7 +414,8 @@ Name no company here, so an empty first target can move on to the next one
 without another question.
 
 When the sample arrives, show its rows as in “Calibration decision,” with the
-company each came from. If the rows are the requested signal, ask:
+company each came from, and for text signals first “Show the full text.” If
+the rows are the requested signal, ask:
 
 ```markdown
 Do these look like the <signal> you want?
@@ -490,6 +499,18 @@ fields. Never replace the table with a count or a role roll-up. When the user
 asked to calibrate, a recommendation to leave the filter broad still ends with
 the same yes-or-adjust prompt; it gives them the smallest useful control.
 
+**Show the full text.** For posts, reviews, mentions and replies, the user approves the words, and
+your host may bar repeating third-party text in chat. As rows arrive, write
+them to a file and display or attach it (with no such tool, run the command
+in the user's terminal, then print the file there, because the command itself
+prints only the export path); never substitute a summary:
+
+```bash
+deepline db query --format markdown --out <key>-sample.md --sql "select <who>, <when>, <url>, <text> from <stream table> where _dl_monitor_id = '<key>' and _dl_received_at >= '<setup start time>'"
+```
+
+Ask “Do these look like…” only after that.
+
 Use the “Observe and refine” decision rules: inspect every 30 seconds, show
 matches as soon as they arrive, and widen only along the chosen volume tier.
 Do not ask for another approval already covered by setup consent.
@@ -532,7 +553,7 @@ shape, apply only the requested patch and read it back. Public keys and rows
 remain, but the upstream resource may be replaced; an ordinary update does not
 promise backfill.
 
-Before deployment, page `monitors list --status all` to completion. Reuse matching
+Before deployment, page `monitors list --state all` to completion. Reuse matching
 tool/scope; explicitly reactivate a disabled match rather than duplicate it.
 Inspect shared streams and known consumers: `sqlListeners.where` limits a Play's
 reaction, not ingestion charges.

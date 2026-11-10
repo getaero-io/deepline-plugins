@@ -1,8 +1,8 @@
-<!-- GENERATED FROM ProviderMonitorCapabilityDefinition; content-sha256: 9587892a1d6d3b5700af827379edf5df9c909eb4cedf873aec14bc615aa9a5d7; run bun run docs:monitor-contract -->
+<!-- GENERATED FROM ProviderMonitorCapabilityDefinition; content-sha256: da2552d0baf4cf210b53e909db9b53fd1d2591b1a9612fcbe05ab0c6a20854d5; run bun run docs:monitor-contract -->
 
 # Monitor Contract Reference
 
-This factual reference is generated from the same monitor capability contracts used by validation and the live `tools get` / `monitors available` surfaces. Keep rationale and workflows in hand-written guides.
+This factual reference is generated from the same monitor capability contracts used by validation and the live `tools list` / `describe` surfaces. Keep rationale and workflows in hand-written guides.
 
 ## Shared lifecycle
 
@@ -39,7 +39,7 @@ Ingest RB2B identified-visitor webhook events after you add the Deepline endpoin
 
 #### Pricing, identity, and updates
 
-- Pricing: Use the Deepline pricing returned by describe, monitors available, check, or deploy --dry-run. Provider spend is not exposed.
+- Pricing: Use the Deepline pricing returned by describe, check, or deploy --dry-run. Provider spend is not exposed.
 - Identity: This monitor uses the provider capability identity declared by Deepline.
 - Update: Use monitors update for a patch or deploy for a complete desired definition.
 - Backfill: Existing Customer DB rows are retained; this capability does not promise provider backfill unless its provider documentation says otherwise.
@@ -84,7 +84,7 @@ Capture signed, session-based Radar website activity from the Deepline Analytics
 
 #### Pricing, identity, and updates
 
-- Pricing: Use the Deepline pricing returned by describe, monitors available, check, or deploy --dry-run. Provider spend is not exposed.
+- Pricing: Use the Deepline pricing returned by describe, check, or deploy --dry-run. Provider spend is not exposed.
 - Identity: This monitor uses the provider capability identity declared by Deepline.
 - Update: Use monitors update for a patch or deploy for a complete desired definition.
 - Backfill: Existing Customer DB rows are retained; this capability does not promise provider backfill unless its provider documentation says otherwise.
@@ -209,7 +209,7 @@ Creates a Deepline-managed contact radar data pipe and writes provider-native co
 
 #### Pricing, identity, and updates
 
-- Pricing: Use the Deepline pricing returned by describe, monitors available, check, or deploy --dry-run. Provider spend is not exposed.
+- Pricing: Use the Deepline pricing returned by describe, check, or deploy --dry-run. Provider spend is not exposed.
 - Identity: The provider resource scope uses radar_type, profile_url. Different effective payload configurations in that scope may be separate monitor resources; exact duplicates still conflict.
 - Update: Use monitors update for a patch or deploy for a complete desired definition.
 - Backfill: Existing Customer DB rows are retained; this capability does not promise provider backfill unless its provider documentation says otherwise.
@@ -237,27 +237,66 @@ Creates a Deepline-managed industry radar data pipe and writes provider-native i
 }
 ```
 
+#### Track job openings in an industry
+
+```json
+{
+  "key": "revops-job-openings-us",
+  "tool": "deepline_native.industry_radar",
+  "payload": {
+    "industry": "revenue operations",
+    "countries": ["United States"],
+    "radar_type": "industry_job_openings"
+  }
+}
+```
+
+#### Track every new funding round
+
+```json
+{
+  "key": "funding-rounds",
+  "tool": "deepline_native.industry_radar",
+  "payload": {
+    "radar_type": "industry_funding_rounds"
+  }
+}
+```
+
+#### Track newly founded companies
+
+```json
+{
+  "key": "new-companies",
+  "tool": "deepline_native.industry_radar",
+  "payload": {
+    "radar_type": "industry_new_companies"
+  }
+}
+```
+
 ### Outputs
 
-| Stream                        | Customer DB table                                             | Meaning                                                                                  |
-| ----------------------------- | ------------------------------------------------------------- | ---------------------------------------------------------------------------------------- |
-| `industry_mentions`           | `deepline_native.deepline_native_industry_mentions`           | Streams news and web mentions across an industry into your warehouse and triggers plays. |
-| `industry_job_openings`       | `deepline_native.deepline_native_industry_job_openings`       | Streams new job postings across an industry into your warehouse and triggers plays.      |
-| `industry_funding_rounds`     | `deepline_native.deepline_native_industry_funding_rounds`     | DeeplineNativeIndustryFundingRoundsRow                                                   |
-| `industry_funding_references` | `deepline_native.deepline_native_industry_funding_references` | DeeplineNativeIndustryFundingReferencesRow                                               |
+| Stream                        | Customer DB table                                             | Meaning                                                                                                               |
+| ----------------------------- | ------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------- |
+| `industry_mentions`           | `deepline_native.deepline_native_industry_mentions`           | Streams news and web mentions across an industry into your warehouse and triggers plays.                              |
+| `industry_job_openings`       | `deepline_native.deepline_native_industry_job_openings`       | Streams new job postings across an industry into your warehouse and triggers plays.                                   |
+| `industry_funding_rounds`     | `deepline_native.deepline_native_industry_funding_rounds`     | Streams every newly announced funding round, with the company and round size, into your warehouse and triggers plays. |
+| `industry_funding_references` | `deepline_native.deepline_native_industry_funding_references` | Source article URLs for each funding round, one row per reference.                                                    |
+| `industry_new_companies`      | `deepline_native.deepline_native_industry_new_companies`      | Streams newly founded companies and their founders into your warehouse and triggers plays.                            |
 
 #### Fields
 
 | Field           | Semantics                                                                                                                                                                                                                                                                                                     |
 | --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `radar_type`    | Deepline industry radar output family. The selected value determines the derived output tables.                                                                                                                                                                                                               |
-| `industry`      | Industry or market segment used to create or seed the upstream radar.                                                                                                                                                                                                                                         |
-| `countries`     | Optional for 'industry_job_openings' only. Array of country names to filter job postings by location. Maximum 5 countries allowed. Examples: 'United States', 'Canada', 'United Kingdom'.                                                                                                                     |
+| `industry`      | Keyword or phrase that scopes the feed. Required for industry_mentions and industry_job_openings. Not accepted for industry_funding_rounds or industry_new_companies, which are global feeds of every new funding round or newly founded company.                                                             |
+| `countries`     | Optional for industry_job_openings only: up to 5 country names that job postings must be located in, such as "United States" or "Canada".                                                                                                                                                                     |
 | `updates_since` | Optional permanent radar starting point. Use an RFC3339 timestamp with a time zone to receive qualifying historical findings from that instant. Omit to start at radar creation. The timestamp must be in the past and within five calendar years. Historical processing can continue for the first 24 hours. |
 
 #### Pricing, identity, and updates
 
-- Pricing: Use the Deepline pricing returned by describe, monitors available, check, or deploy --dry-run. Provider spend is not exposed.
+- Pricing: Use the Deepline pricing returned by describe, check, or deploy --dry-run. Provider spend is not exposed.
 - Identity: The provider resource scope uses radar_type, industry. Different effective payload configurations in that scope may be separate monitor resources; exact duplicates still conflict.
 - Update: Use monitors update for a patch or deploy for a complete desired definition.
 - Backfill: Existing Customer DB rows are retained; this capability does not promise provider backfill unless its provider documentation says otherwise.
@@ -290,7 +329,7 @@ Ingest Vector contact.visited events after you add the Deepline callback URL to 
 
 #### Pricing, identity, and updates
 
-- Pricing: Use the Deepline pricing returned by describe, monitors available, check, or deploy --dry-run. Provider spend is not exposed.
+- Pricing: Use the Deepline pricing returned by describe, check, or deploy --dry-run. Provider spend is not exposed.
 - Identity: This monitor uses the provider capability identity declared by Deepline.
 - Update: Use monitors update for a patch or deploy for a complete desired definition.
 - Backfill: Existing Customer DB rows are retained; this capability does not promise provider backfill unless its provider documentation says otherwise.

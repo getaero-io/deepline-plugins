@@ -1,9 +1,15 @@
-Use CrustData for structured discovery and enrichment with recall-first filtering.
+<!-- skill-tool-field: crunchbase_total_investment_usd -- Historical CompanyDB filter_type value, not an executable tool. -->
+
+<!-- skill-tool-field: crunchbase_categories -- Historical CompanyDB filter_type value, not an executable tool. -->
+
+<!-- skill-tool-field: crunchbase_investors -- Historical CompanyDB filter_type value, not an executable tool. -->
+
+Use CrustData for structured discovery and enrichment with recall-first filtering. The legacy `crustdata_*` tools are hidden from discovery and fail with a provider authorization error; use the `crustdata_v3_*` tools.
 
 - Start with free autocomplete (`crustdata_v3_company_search_autocomplete`, `crustdata_v3_person_search_autocomplete`) to discover canonical values. Confirm these hints with `deepline describe <tool-id>`.
 - Preserve recall-first matching: in historical CompanyDB filters, fuzzy `(.)` was the default and strict `[.]` was only for an explicit substring request. V3 uses `contains`; confirm its semantics and current field vocabulary rather than forwarding old operators.
 - Use `crustdata_v3_company_search` as the resolver step; for `crustdata_v3_company_enrich`, prefer domain-based inputs instead of name-only payloads. Check each input schema before converting older company filters.
-- For job data, use `crustdata_v3_job_search` for indexed listings or `crustdata_v2_live_job_search` when freshness is required for a known CrustData company id. Legacy job-listing compatibility actions are hidden from discovery and should not be selected for new workflows.
+- For job data, use `crustdata_v3_job_search`.
 - In changed-company email recovery, use Crust as the second step after LeadMagic and before PDL.
 - Keep filters composable and inspect a small sample before adding expensive enrichments.
 - If Crust misses in the first 10 rows for a batch, move it later for the rest of that batch.
@@ -46,7 +52,7 @@ translating. Do not blindly rename tools while keeping these older filters.
 ### Examples
 
 ```bash
-deepline tools execute crustdata_v3_company_search_autocomplete --input '{"field":"taxonomy.professional_network_industry","query":"software","limit":5}'
+deepline run crustdata_v3_company_search_autocomplete --input '{"field":"taxonomy.professional_network_industry","query":"software","limit":5}'
 ```
 
 Historical search payload for interpreting existing CompanyDB work (not a V3
@@ -76,32 +82,28 @@ does not replace the company-search resolver or the domain-first enrichment poli
 Save this custom workflow as `company-lookup.play.ts`:
 
 ```ts
-import { definePlay } from 'deepline';
+import deepline from 'deepline';
 
-export default definePlay(
-  'company-lookup',
-  async (ctx, input: { csv: string }) => {
-    const accounts = await ctx.csv(input.csv, { required: ['Company'] });
-    const rows = await ctx
-      .dataset('accounts', accounts)
-      .withColumn('company_lookup', (row, rowCtx) =>
-        rowCtx.tools.execute({
-          id: 'company_lookup',
-          tool: 'crustdata_v3_company_search_autocomplete',
-          input: { field: 'basic_info.name', query: row.Company, limit: 1 },
-          description: 'Look up the canonical company-name candidate.',
-        }),
-      )
-      .run({});
-    return { rows };
-  },
-  { description: 'Look up company names from the supplied accounts CSV.' },
-);
+export default async function (input: { csv: string }) {
+  const accounts = await deepline.csv(input.csv, { required: ['Company'] });
+  const rows = await deepline
+    .dataset('accounts', accounts)
+    .withColumn('company_lookup', (row) =>
+      deepline.tools.execute({
+        id: 'company_lookup',
+        tool: 'crustdata_v3_company_search_autocomplete',
+        input: { field: 'basic_info.name', query: row.Company, limit: 1 },
+        description: 'Look up the canonical company-name candidate.',
+      }),
+    )
+    .run({});
+  return { rows };
+}
 ```
 
 ```bash
 deepline plays check company-lookup.play.ts
-deepline plays run --file company-lookup.play.ts --csv accounts.csv --watch
+deepline run company-lookup.play.ts --input '{"csv":"accounts.csv"}'
 ```
 
 V3's `basic_info.name` replaces the historical autocomplete field `company_name`;

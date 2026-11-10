@@ -19,7 +19,7 @@ Connect the workspace's own Lusha API key in Dashboard → Integrations before c
 
 ### lusha_enrich_person
 
-Enriches a person by LinkedIn URL (preferred), email, or name+company. Returns emails at `emails[].email` and phones at `phones[].number`.
+Enriches a person by LinkedIn URL (preferred), email, or name+company. Returns emails at `emailAddresses[].email` and phones at `phoneNumbers[].number`.
 
 ```json
 {
@@ -39,7 +39,8 @@ Optional flags:
 
 - `reveal_emails: true` — include email addresses in response (default: true)
 - `reveal_phones: true` — include phone numbers (default: true)
-- `signals: true` — include intent signal data
+- `signals: true` — also return promotion and company-change signals under `signals` (1 extra Lusha credit)
+- `include_company_profile: false` — skip the full company profile under `company` (saves 1 Lusha credit per found person; `company` then has only `name`, `fqdn` and `mainIndustry`)
 
 For an email-only lookup, always pass `reveal_phones: false`. Lusha reveals phones by default and charges 5 Lusha credits per revealed phone versus 1 per email, so omitting the flag pays for phones you did not ask for:
 
@@ -53,7 +54,7 @@ For an email-only lookup, always pass `reveal_phones: false`. Lusha reveals phon
 
 ### lusha_enrich_company
 
-Enriches a company from domain, name, or Lusha company ID. Returns size, revenue, industry, technologies.
+Enriches a company from domain, name, or Lusha company ID (`v3Id` / `v3CompanyId` from a current result). Returns size, revenue, industry, technologies.
 
 ```json
 {
@@ -78,9 +79,9 @@ Prospecting search with rich filters: department, seniority, company size, indus
 
 ## Output shape
 
-`lusha_enrich_person` returns a flat profile. Email at `emails[0].email` or `email`. Phone at `phones[0].number` or `phone`.
+`lusha_enrich_person` returns a flat profile. Email at `emailAddresses[0].email`, phone at `phoneNumbers[0].number`, title at `jobTitle.title`, company at `company.name`.
 
-`lusha_enrich_company` returns a flat company object with `name`, `domain`, `size`, `industry`, `technologies[]`.
+`lusha_enrich_company` returns a flat company object with `name`, `domain`, `employees`, `revenueRange`, `mainIndustry`, `technologies[]`.
 
 `lusha_search_contacts` returns `{ contacts: [...], pagination: { page, pageSize, total, totalPages } }`.
 
@@ -89,4 +90,4 @@ Prospecting search with rich filters: department, seniority, company size, indus
 - Don't use Sales Navigator or Recruiter LinkedIn URLs — they'll fail
 - Don't include "http://" or "www." in domain values for company enrichment
 - Don't pass `company_name` alone without `first_name` + `last_name` for person lookup — name+company is the minimum combo
-- Don't assume `phone` (top-level) is always populated — check `phones[]` array first for the most complete list
+- Don't read a top-level `email` or `phone` — use the `emailAddresses[]` and `phoneNumbers[]` arrays

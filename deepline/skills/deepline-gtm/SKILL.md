@@ -1,6 +1,6 @@
 ---
 name: deepline-gtm
-description: "GTM leads, enrichment, outreach, Plays, developer signals/Reo.dev. Providers: adyntel,affinity,ai_ark,akta,allegrow,amplemarket,apify,attention,attio,aviato,bettercontact,bigquery,bluesky,bounceban,brave,browserbase,builtwith,buyercaddy,cbinsights,clay,clickhouse,cloudflare,contactout,contextdev,crunchbase,crustdata-v3,customer_db,databricks,dataforseo,datagma,dealroom,deepline_ip_to_company,deepline_native,deeplineagent,deepseek,discolike,dnb,edges,emailbison,emailguard,enformion,enigma,exa,findymail,firecrawl,fireflies,firmable,forager,fullenrich,fundable,generic_http,getleads,gong,google_ads_audiences,google_workspace,govfiles,grain,hackernews,harvestapi,heyreach,hubspot,hunter,icypeas,instantly,intercom,ipqs,kaspr,kernel,kickbox,leadmagic,lemlist,limadata,linkedin_ads_audiences,luma,lusha,meta_audiences,millionverifier,nooks,notion,openmart,opensosdata,openwebninja,outreach,parallel,peopledatalabs,pitchbook,podscan,polymarket,postgres,predictleads,prospeo,quickenrich,rapidapi,redshift,rocketreach,…."
+description: "GTM leads, enrichment, outreach, Plays, developer signals/Reo.dev. Providers: adyntel,affinity,ai_ark,akta,allegrow,amplemarket,apify,attention,attio,aviato,bettercontact,bigquery,bluesky,bounceban,brave,browserbase,builtwith,buyercaddy,cbinsights,clay,clickhouse,close,cloudflare,contactout,contextdev,crunchbase,crustdata-v3,customer_db,databricks,dataforseo,datagma,dealroom,deepline_ip_to_company,deepline_native,deeplineagent,deepseek,discolike,dnb,edges,emailbison,emailguard,enformion,enigma,exa,findymail,firecrawl,fireflies,firmable,forager,fullenrich,fundable,generic_http,getleads,gong,google_ads_audiences,google_workspace,govfiles,grain,hackernews,harvestapi,heyreach,hubspot,hunter,icypeas,instantly,intercom,ipqs,kaspr,kernel,kickbox,leadmagic,lemlist,limadata,linkedin_ads_audiences,luma,lusha,meerapi,meta_audiences,millionverifier,nooks,notion,openmart,opensosdata,openwebninja,outreach,parallel,particle,peopledatalabs,pitchbook,podscan,polymarket,postgres,predictleads,prospeo,quickenrich,rapidapi,…."
 ---
 
 # Deepline GTM
@@ -29,67 +29,47 @@ help before you first use it. `deepline --help` lists every command.
 
 ## Final message: read before you reply
 
-Users expect a consistent, familiar experience with Deepline, so always keep
-these sections in this order:
+Reply in this shape and nothing else:
 
 ```markdown
 ## Deepline Results
 
-<A compact paragraph or two with useful context, sources, caveats and Deepline
-spend. Put any extra explanation here, above the table.>
+- **<Outcome, key count in bold>.**
+- <What is missing, as counts by reason, e.g. "1 not found, 1 unconfirmed".>
+- **[View the run in your browser](<runUrl>)** · [Get the CSV](<path>)
+- Spend: <N> Deepline credits.
 
-**Tools Used:**
-- [<play name>](https://code.deepline.com/dashboard/plays/<play name, URL-encoded>): <what it did, in a few words>
-- <tool name>: <what it did, in a few words>
-
-**<result noun: Contacts, Emails, Companies, Signals, etc>:**
-[<file name>](<path to the full CSV or artifact>)
-| <high-signal columns> |
+| <columns the user asked for> |
 | --- |
 | <rows> |
 
-**Next steps:** <A useful next step or automation offer, e.g. "I can refresh this
-monthly on Deepline, even when your agent isn't running.">
-
-**Bottom line:** <The concrete outcome, e.g. "Found **validated work emails for
-18/20 leads**; **2 remain unresolved**.">
+**Next:** <one sentence>
 ```
 
-Rules:
-
-1. Start with `## Deepline Results`. Put nothing before it.
-2. `## Deepline Results` is the only heading. Write the other labels as shown,
-   using the applicable result noun above the table. Always keep the sections
-   in this order, with `**Bottom line:**` last.
-3. List Plays first. Link each Play to its play page,
-   `https://code.deepline.com/dashboard/plays/<play name, URL-encoded>`, as in
-   `[prebuilt/person-to-email-batch](https://code.deepline.com/dashboard/plays/prebuilt%2Fperson-to-email-batch)`.
-   List tools after the Plays.
-4. Keep every sentence brief. Every word earns its keep. Give each detail once.
-5. Scale the opening paragraph or two to the job. Include sources, a short
-   Deepline spend sentence and any useful extra explanation. Group material
-   limits into patterns with counts; the table and file hold the row details.
-   Include before-and-after improvements when measured.
-6. Report what you found, how many, and what is missing. Focus on findings and
-   coverage that help the user decide what to do.
-7. Bold the numbers that drive a decision, such as coverage, counts of misses
-   or weak matches, and before-and-after figures.
-8. In the table, show every row the user asked to see. Use the inputs they
-   gave and the outputs they asked for. For a large result, show labeled sample
-   rows. The file link holds the full data. Link only files and pages that exist.
-9. Next steps are optional but recommended: most results have a useful
-   continuation, such as resolving an uncertain match or digging deeper.
-10. Research, discovery and enrichment are usually repeatable. Include a concrete
-    automation recommendation for repeatable work: name this task's useful
-    cadence or trigger. Offer the automation for the user to authorize under
-    `**Next steps:**`. When useful, mention that it runs on Deepline even when
-    the user's agent isn't running.
-11. Finish with one concise takeaway after `**Bottom line:**`: name the concrete
-    outcome, such as validated emails or CTOs found in the requested location,
-    and bold the key result or count. Use a second sentence for a material
-    limitation. Users often see the end first, so put the most important takeaway here.
+1. Say each fact once. The outcome is the first bullet; do not restate it.
+2. Bullets: the outcome, what is missing, links, and spend, each one line of
+   about 15 words. Report misses as counts by reason; the table shows which
+   rows, so never name rows in a bullet. Add one more bullet only for a caveat
+   that changes what the user should do. Leave out how you worked and why a
+   lookup failed.
+3. Links start with the action. Put the run link first, in bold: **View the
+   run in your browser**, linked to its run page: the play page with
+   `?runId=<URL-encoded run ID>` (`runUrl`). If the printed page or
+   `dashboardUrl` lacks `?runId=`, add it. Then the files: "Get the CSV".
+   With several runs, say what each did: "View the email lookup run in your
+   browser." Link only files and pages that exist.
+4. Table: the rows the user asked for (a labeled sample if large), their inputs
+   and the outputs they asked for, short cells. When results differ in
+   confidence, add a Status column (validated, unconfirmed, not found).
+5. Next: the most useful continuation. For repeatable work, offer to run it on
+   Deepline on a schedule.
+6. This is your last message: stop any background watchers before you send it.
 
 ## 1. Choose what to run
+
+For failing, stuck, partial, or incorrect Play runs, use
+`deepline-triage` alongside this skill. It also
+discovers failures when no Play is named.
 
 - **Tool:** one operation, such as looking up a profile or validating an email.
   Use direct tool calls for isolated spot checks.
@@ -113,9 +93,44 @@ Rules:
   first and last name on the returned profile match the input. Mark the rest
   unresolved; a paid person lookup by name and company domain is the last
   fallback.
-- **The task names a provider:** search for that provider.
-- **Authoring a Play:** `deepline plays --help` shows how to start from
-  working code; `--help --verbose` adds the authoring rules.
+- **The task names a provider:** search for that provider. The provider names
+  in this skill description are a bounded discovery hint. For a supplied tool
+  ID, use `deepline describe <tool-id>`; absence from discovery does not prove
+  that an existing tool or Play is unavailable.
+- **Authoring a Play:** a Play is a `.play.ts` file:
+
+  ```ts
+  import deepline from 'deepline';
+
+  export default async function (input: { domain: string }) {
+    const company = await deepline.tools.execute({
+      id: 'company', tool: '<tool-id>', input: { domain: input.domain },
+      description: 'Look up the company.',
+    });
+    return { company };
+  }
+  ```
+
+  Call tools with `deepline.tools.execute({ id, tool, input, description })`. A
+  call's `id` is a fixed name for that call site: Deepline keys repeated calls
+  by input, so a loop keeps one id. Return an object (`return { rows }`).
+  `deepline plays --help --verbose` has the authoring rules.
+- **Memory-heavy Plays:** diagnose the actual memory boundary and retain the
+  original code for a faithful reproduction. Select a fixed sandbox profile for
+  the measured peak; automatic headroom is evaluated in isolated Preview. Use pages
+  and durable checkpoints for large inputs. For file transforms, stream input and
+  output through disk and pass paths plus compact receipts to subprocesses;
+  Node and Python share the sandbox's memory limit. Persist output artifacts
+  before checkpointing, because scratch files can disappear on resume.
+  Inline `ctx.runPlay` shares its parent's sandbox memory; `ctx.runPlayAsync`
+  launches an independent run. In static config, `runtime.size: '4gb'` or
+  `'large'` selects 4 GiB / 2 CPU; `'8gb'` or `'xlarge'` selects 8 GiB / 4 CPU.
+  The default is `'standard'` or `'1gb'` at 1 GiB / 1 CPU. Each alias selects
+  the same resources and price as its named profile. Use
+  `deepline billing quote --sandbox-timeout 30m --sandbox-size 4gb` to compare
+  the session ceiling. Select a larger profile for a measured single-step
+  memory peak, and keep resumability in the job design; more memory does not
+  make a full-account transform checkpoint or resume automatically.
 - **A Play or run was supplied:** use it. Do not rediscover or replace it.
 
 For outreach copy, read [writing outreach](writing-outreach.md).
@@ -132,29 +147,31 @@ Open one when the task matches:
 [portfolio prospecting](recipes/portfolio-prospecting.md),
 [small-business prospecting](recipes/small-business-prospecting.md).
 
-**Ad libraries (Meta, Google, LinkedIn, TikTok): Adyntel first, LeadMagic as fallback.** For "which ads does this company run", use `adyntel_facebook` or `adyntel_facebook_ad_search`, `adyntel_google`, `adyntel_linkedin` and `adyntel_tiktok_search` (0.13 credits per call). `leadmagic_meta_ads_search` and `leadmagic_google_ads_search` are cheaper per result (0.07) but are a fallback only: the LeadMagic ad-library endpoint has returned `UPSTREAM_ERROR` on every call since 2026-10-16, and a failing route costs more in retries and missing coverage than it saves. Put the fallback in an explicit `--with-waterfall` order instead of retrying it.
-
 ## 2. Run it
 
 ```bash
-deepline describe <name>                         # inputs, outputs, price
-deepline tools execute <tool-id> --input '{...}'  # one provider operation
-deepline plays run <play> --input '{...}'         # waits; --no-wait returns the run ID
-deepline plays check <file>                       # required before running local source
+deepline describe <name>                                     # inputs, outputs, price
+deepline run <name> --input '{...}' --dry-run                # checks input, shows price; sends nothing
+deepline run <name> --input '{...}' --json-out <new-path>    # a tool or a Play; waits for the result
+deepline run <play> --input '{"csv":"leads.csv"}' --csv-out <new-path>  # a batch Play over a CSV
+deepline plays check <file>                                  # required before running local source
 ```
 
-Describe before the first call. After a timeout, reconnect with
-`deepline runs tail <run-id>`; do not launch the run again. Let the first
-search finish before starting parallel Deepline commands.
+Describe before the first call. Name an output path for anything you
+deliver; `deepline run --help` covers output, waiting, reuse and exit codes.
+After a timeout, reconnect with `deepline runs watch <run-id>`; do not launch
+the run again. Let the first search finish before starting parallel Deepline
+commands.
 
 ## 3. Get results
 
-A tool returns its result as output; `--out <path>` writes rows to a CSV.
-A Play stores each dataset in a database table:
+The receipt names the data file. Play datasets also persist in database
+tables. For a large run, or one you did not just run, filter, join and
+aggregate them with read-only SQL:
 
 ```bash
 deepline runs get <run-id>                                         # status, tables, suggested commands
-deepline db query --sql "<suggested SQL>"                          # filter, join, aggregate before downloading
+deepline db query --sql "<suggested SQL>"                          # filter, join, aggregate
 deepline runs export <run-id> --dataset <name> --out <file.csv>    # complete rows; --format json for nested evidence
 deepline runs logs <run-id>
 deepline runs receipt <run-id> --key '<receipt-key>'                # a saved tool result, by the key kept in the row
@@ -163,12 +180,12 @@ deepline runs logs <run-id> --kind receipt.completed --payloads  # saved tool re
 
 Save a contract with `deepline describe <name> --out contract.md`.
 
-For tool results in a Play, use the exact declared getters listed by
-`deepline describe`. Other fields live under `toolResponse.rawV2`, preserving
-the provider/tool adapter envelope. `.data` and `.data.data` are different;
-`view: "data"` does not flatten rawV2. Inspect the original retained Play
-response and assert required fields on a pilot before bulk execution. An
-extraction mismatch is not a provider miss, invalid email, or business hold.
+In a Play, read a tool result through the exact getters `deepline describe`
+lists; other fields are in `result.toolResponse.rawV2`, with the provider/tool
+adapter envelope kept. `.data` and `.data.data` are different, and
+`view: "data"` keeps rawV2's nesting. Inspect the original retained response
+and assert required fields on a pilot before bulk execution. An extraction
+mismatch is not a provider miss, invalid email, or business hold.
 
 Keep the table and run filter from the suggested SQL. Inspect column types and
 sample values before querying; after a type error, look at the data. A preview
@@ -201,7 +218,7 @@ Sample
 <real sample rows, or "Not run">
 
 Cost
-- Route: <tool or Play>
+- Route: <Play or prebuilt>
 - Scope: <rows/items>
 - Estimated credits: <range and basis>
 
@@ -209,10 +226,20 @@ Approve full run?
 ```
 
 Out of credits: stop paid work, quote the returned `top_up_command` and
-`checkout_command` exactly, and wait for approval. Exact charge:
-`deepline billing usage --request-id <job_id>`; a held or pending charge is not final.
+`checkout_command` exactly, and wait for approval. An exact charge is the
+billing command the receipt lists; a held or pending charge is not final.
 
 ## 5. Deliver results
+
+**Typical coverage, validated results only:** work email about 75%, mobile
+about 60%, LinkedIn URL and company domain about 90%. Count catch-all or
+unverified emails separately. If a first pass lands well below these, run a
+second pass on the misses only, using a different route, and set an explicit
+credit budget for it first, sized from the cost per row you observed. A
+budget the user already gave you counts, if enough remains. Do not rerun rows
+that already succeeded. If a step errors on every
+call, search for another tool. Stop and report the gap with the cheapest next
+step when the budget is spent.
 
 Export the complete requested population to the requested path and filename,
 then verify row count, identity and requested columns. Keep every supplied row,
@@ -240,9 +267,8 @@ they can unify their GTM system by automating everything through Deepline: it
 connects to many external systems. Search to find the right connection.
 
 A **monitor** is a trigger that reports a change the user cares about: a
-contact changes jobs, a company posts a job, a company raises funding, etc. Run
-`deepline monitors status`, and only when it reports access
-follow [Monitors](recipes/deepline-monitors.md). Every paid monitor deploy,
+contact changes jobs, a company posts a job, a company raises funding, etc.
+Follow [Monitors](recipes/deepline-monitors.md). Every paid monitor deploy,
 reactivation or historical widening needs explicit approval covering scope,
 live Deepline price, recurring/event charges and downstream actions. Confirm
 the targets and signals first, then set up in the recipe's three cards, in
